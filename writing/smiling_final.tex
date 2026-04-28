@@ -1,0 +1,926 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\usepackage{longtable,booktabs,array}
+\newcounter{none} % for unnumbered tables
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Smiling your way to happiness or misery? Experimental tests of competing perspectives},
+  pdfauthor={Nicholas A. Coles; Annabel V. Dang; Joao Francisco Goes Braga Takayanagi},
+  pdfkeywords={emotion, emotion embodiment, emotion regulation, emotion
+labor, facial feedback, happiness},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{Smiling your way to happiness or misery? Experimental tests of
+competing perspectives}
+\author{Nicholas A. Coles \and Annabel V. Dang \and Joao Francisco Goes
+Braga Takayanagi}
+\date{}
+\begin{document}
+\maketitle
+\begin{abstract}
+Researchers and lay people alike have long been interested in whether
+people can make themselves feel happier if they simply fake a smile.
+Thus far, two largely disconnected research communities have provided
+seemingly competing answers to this question, with (a) emotion
+embodiment researchers observing positive causal links in experimental
+contexts, and (b) emotion labor researchers observing negative
+associations in real-world work contexts. In the present work, we
+conduct a pre-registered conceptual extension of the largest
+experimental demonstration of the positive effects of posed smiles on
+mood, focusing on three factors that may explain why such effects fail
+to generalize to real-world work contexts. More specifically, we test
+whether posed smiles fail to improve mood (1) in negative contexts, (2)
+when performed repeatedly, and/or (3) when performed to avoid
+punishment.
+\end{abstract}
+
+
+\section{Introduction}\label{introduction}
+
+``You'll find that life is still worthwhile, if you just smile'' -- Nat
+King Cole (1954)
+
+``Pretending to be happy is almost like being happy. Until you remember
+that you're only pretending. Then you're sad. Really sad.'' -- Brittainy
+C. Cherry (2014)
+
+Researchers, artists, and lay people alike have long wondered if people
+can make themselves feel happier if they simply fake a smile (Coles,
+Larsen, \& Lench, 2019). In addition to its allure as a cheap and
+scalable intervention for promoting happiness, such an idea connects to
+fundamental questions about the nature of emotion. For over a century,
+emotion embodiment researchers have posited that peripheral nervous
+system activity causally shapes emotion-related processes, including the
+subjective experience of emotion itself (Barrett, 2017; Cacioppo et al.,
+1992; Damasio \& Carvalho, 2013; Feldman et al., 2024; James, 1884,
+1894; Niedenthal, 2007; Scherer \& Moors, 2019; Tomkins, 1962; Wood et
+al., 2016). To evaluate such possibilities, many researchers have
+conducted experiments with an easy-to-manipulate component of the
+peripheral nervous system: facial musculature. For example, in a study
+ostensibly about how muscle movements influence galvanic skin response,
+Coles, Gaertner, Frohlich, Larsen, and Basnight-Brown (Study 1, 2023)
+found that participants reported higher levels of happiness immediately
+after completing muscle movement trials that configured their face into
+a smile vs.~scowl. Similar patterns have been observed in (1) multiple
+pre-registered replications (Baker et al., 2025; Coles et al., 2023;
+Noah et al., 2018; but see {Wagenmakers et al.}, 2016), (2) a
+pre-registered meta-analysis of nearly 50 years of research (Coles,
+Larsen, \& Lench, 2019), and (3) a large-scale adversarial collaboration
+conducted across 19 countries ({Coles et al.}, 2022).
+
+The emotion embodiment literature provides both a theoretical and
+empirical rationale for suggesting that people can make themselves feel
+happier if they ``just smile'' (Cole, 1954). However, if true, it is
+remarkable that people are generally \emph{least happy} in jobs that
+notoriously require such behaviors, such as food and retail services
+(Smith, 2007). In actuality, researcherswho study these contexts often
+describe the negative effects of forcing one's emotional expression to
+match the demands of a job (Hochschild, 1979)\emph{.} Emotion labor
+researchers often describe posed smiles as ``surface acting'', an act of
+feigning required emotional displays without changing internal states,
+which is often (imperfectly) likened to the notion of ``expressive
+suppression'' from research on basic emotion regulation strategies
+(e.g., Gross, 1998). Relative to strategies that involve re-interpreting
+negative thoughts (i.e., cognitive reappraisal) to genuinely feel and
+express required emotions, expressive suppression strategies are
+generally characterized as inferior (Webb et al., 2012),
+counterproductive (Fernandes \& Tone, 2021), and regulatorily costly in
+terms of decreases in well-being (Dryman \& Heimberg, 2018; Hu et al.,
+2014; Yu et al., 2023), social outcomes (Chervonsky \& Hunt, 2017), and
+cognitive performance (Roche \& Arnold, 2018; Zhu et al., 2021).
+Combined, this provides emotion labor researchers with both a
+theoretical and empirical rationale for warning against ``pretending to
+be happy'' (Cherry, 2014).
+
+When two scientific perspectives compete, it is not uncommon for one
+camp to fail to recognize each other's epistemic standards or legitimacy
+(Galison, 1997). In the context of smiling and happiness, some
+researchers may be tempted to dismiss the emotion labor perspective
+altogether due to internal validity concerns. For context, emotion labor
+researchers have documented a large number of negative correlations
+between smiling and indicators of happiness, often in real-world work
+contexts (Boemo et al., 2022; Fernandes \& Tone, 2021; Hülsheger \&
+Schewe, 2011; Visted et al., 2018). However, there are many confounds to
+consider. For example, negative correlations may be ``due to the
+stressful situation that triggers negative emotions'' requiring people
+to regulate their emotion expressions (Zapf et al., 2021, p. 165) -- not
+the actual act of posing a smile. This could also potentially explain
+why researchers in a different theoretical tradition, emotion
+embodiment, observe positive effects of posed smiles: they
+overwhelmingly rely on experimental methods that manipulate smiling
+while controlling for potential confounding variables (e.g., the
+emotional nature of the situation; Coles, Larsen, \& Lench (2019)).
+
+Conversely, some researchers may be tempted to dismiss the emotion
+embodiment perspective over concerns about the ecological validity of
+their experimental settings. Experiments often bear little resemblance
+to real-world work conditions where people pose smiles -- i.e., the
+setting where such acts tend to be linked with negative emotional
+outcomes. For example, consider the largest experimental demonstration
+of the effects of posed smiles on happiness ({Coles et al.}, 2022).
+Participants were led to believe the study was focused on multi-tasking
+and were asked to complete a variety of movements (e.g., tapping their
+leg). For one of those movements, participants were asked to configure
+their face into a smile by following muscle-by-muscle movement
+instructions. Participants did indeed report improved moods after posing
+smiles. However, it's possible that such effects do not generalize
+beyond these sets of relatively artificial conditions (e.g., to
+real-world work contexts).
+
+\subsection{Present Work}\label{present-work}
+
+The present work is designed to evaluate why the effects of posed smiles
+are often observed as positive in emotion embodiment research but
+negative in emotion labor research. We considered multiple way that
+these contexts differ\footnote{Although we limit our initial
+  investigation to three differences between the typical emotion
+  embodiment experiment and emotion labor context, there are several
+  other important differences to later consider, including: the status
+  of interacting partners and the perceived goal of posing smiles.},
+ultimately choosing three to focus our initial inquiry: (1) the
+emotional contexts in which participants pose smiles, (2) the number of
+times they pose the smile, and (3) whether non-compliance could lead to
+financial penalties.
+
+\subsubsection{The Emotion Incongruence Hypothesis: Posed Smiles Do Not
+Improve Mood in Negative
+Contexts}\label{the-emotion-incongruence-hypothesis-posed-smiles-do-not-improve-mood-in-negative-contexts}
+
+First, we consider an \emph{emotion incongruence hypothesis}. Emotion
+embodiment researchers often study the effects of posed expressions in a
+context that is either neutral or emotionally congruent with the posed
+expression (e.g., positive if posing smiles; Coles, Larsen, \& Lench
+(2019)). Once again, consider the largest experimental demonstration of
+such effects ({Coles et al.}, 2022). Half of participants posed smiles
+while essentially staring at a blank screen, and the other half posed
+smiles while looking at mildly pleasant photos. However, when extending
+similar paradigms to a stressful context -- like being submerged in ice
+water -- researchers have thus far failed that posed smiles improve mood
+(Kraft \& Pressman, 2012; Luu et al., 2025; Pressman et al., 2021). In
+addition to providing one explanation for discrepancies between the
+emotion embodiment and labor literatures, such results challenge
+popularized claims about the ability for facial movement manipulations
+to improve mood in everyday negative situations. This includes not only
+recommendations to ``just smile'', but also the neuromuscular electrical
+stimulation of facial musculature associated with positive expressions
+(Efthimiou, Baker, Elsenaar, et al., 2024; Efthimiou, Baker, Clarke, et
+al., 2024) or the use of Botox treatments to inhibit activation in
+facial musculature associated with negative expressions (Schulze et al.,
+2021; Wollmer et al., 2022). (For critiques of such clinical
+translations, see Coles \& Larsen (2021); Coles, Larsen, Kuribayashi, et
+al. (2019)).
+
+\subsubsection{\texorpdfstring{\textbf{\emph{The Repetition Hypothesis:
+Posed Smiles Do Not Improve Mood When Performed
+Repeatedly}}}{The Repetition Hypothesis: Posed Smiles Do Not Improve Mood When Performed Repeatedly}}\label{the-repetition-hypothesis-posed-smiles-do-not-improve-mood-when-performed-repeatedly}
+
+Second, we consider a \emph{repetition hypothesis}. According to this
+hypothesis, posed smiles may improve mood when performed once or twice
+-- e.g., in the context of a typical emotion embodiment experiment.
+However, such effects may disappear (and even reverse) when people pose
+smiles repeatedly -- e.g., in the context of a typical workplace studied
+by emotion embodiment surveys. Practically, such a result would
+highlight the importance of posing smiles in moderation. For example,
+rather than requiring workers to feign happiness in every interaction,
+worker well-being may be maximized by only asking them to do so in their
+most difficult interactions.
+
+\subsubsection{\texorpdfstring{\textbf{\emph{The Punishment Hypothesis:
+Posed Smiles Do Not Improve Mood When Performed to Avoid
+Punishment}}}{The Punishment Hypothesis: Posed Smiles Do Not Improve Mood When Performed to Avoid Punishment}}\label{the-punishment-hypothesis-posed-smiles-do-not-improve-mood-when-performed-to-avoid-punishment}
+
+Third, we consider a \emph{punishment hypothesis}: posed smiles can
+improve mood when performed relatively voluntarily in emotion embodiment
+research -- but not when done under threat of punishment (e.g., reduced
+tips, docked performance evaluations, or job loss) in emotion labor
+research. More practically, such results directly connect to
+conversations about eradicating emotion display requirements at work
+altogether (Grandey et al., 2015). Such conversations often consider
+seemingly conflicting evidence from the emotion embodiment literature:
+that posed smiles can increase happiness in experimental contexts (e.g.,
+Chandwani \& Sharma, 2015; Choi \& Kim, 2015). However, the punishment
+account potentially explains why these effects do not generalize to work
+settings: smiling isn't mood boosting when performed to avoid
+punishment.
+
+\section{Method}\label{method}
+
+In the present work, we evaluate the emotion incongruence, repetition,
+and punishment accounts side-by-side. To do so, we will extend a
+paradigm used in the largest experimental demonstration of the
+mood-boosting effects of posed smiles ({Coles et al.}, 2022) to include
+three experimentally-manipulated factors: (1) the emotional contexts in
+which participants pose smiles, (2) the number of times they pose the
+smile, and (3) whether non-compliance could lead to financial penalties.
+
+The present study features a 2 (Face Movement: pose smile, express
+naturally) x 2 (Emotional Context: positive, negative) x 2 (Movement
+Repetitions: one time, ten times) x 2 (Punishment Threat: present,
+absent) design, with the first factor manipulated within-subjects. These
+manipulations are designed to evaluate boundary conditions of the
+mood-boosting effect of posed smiles -- although they cannot necessarily
+explain \emph{why} those conditions matter. For example, Punishment
+Threat may eliminate the mood-boosting effect of posed smiles because it
+shifts the perceived goal of the smile (to avoid financial penalty
+vs.~appease an experimenter). But it may also eliminate the
+mood-boosting effect of posed smiles because it is intrinsically
+unpleasant. Our Registered Report focuses on identifying these boundary
+conditions with a pre-registered and pre-vetted design, sampling plan,
+and analysis strategy
+(\url{https://osf.io/2suyx/?view_only=8052e16be97d4bee8f93a6fa67b02893}).
+
+\subsection{Participants}\label{participants}
+
+N = 1200 participants will be recruited from Prolific: an online
+platform where people complete studies in exchange for payment. (See
+\emph{Power Simulation} for more information.) Workers on the platform
+will be eligible to participate if they (a) speak English, (b) have a
+functioning webcam, (c) have previously completed at least 5 studies,
+and (d) have at least 90\% of their study submissions accepted. These
+latter two criteria help ensure that the quality of participants'
+responses has been vetted by other researchers.
+
+\subsection{Design}\label{design}
+
+\subsection{Procedure}\label{procedure}
+
+Participants will complete the online experiment via a browser-based
+platform, Gorilla Experiment Builder (Anwyl-Irvine et al., 2020). To
+minimize the impact of demand characteristics (Coles et al., 2025; Orne,
+1962), participants will be told the study examines ``how physical
+multi-tasking influences mathematical speed and accuracy''. For payment,
+participants will be told that they will receive up to \$6. However,
+half of participants will be informed that \$2 will be deducted if we do
+not find that they followed instructions satisfactorily during recorded
+segments of the study. This serves as our manipulation of Punishment
+Threat, but all participants will ultimately receive full compensation
+(\$6). Regardless of assigned condition, participants will be informed
+of recording and will confirm webcam functionality by submitting and
+confirming the playback of a short video through the survey program.
+
+During the study, participants will complete four trials, all of which
+are conceptual replications of a large multi-lab adversarial test of
+facial feedback effects ({Coles et al.}, 2022). The first and last trial
+are sham tasks designed to corroborate the cover story. E.g., in the
+first trial, participants will be asked to ``place your left hand behind
+your head and blink your eyes once per second for 5 seconds''. In the
+last trial, they will be asked to ``Tap your left leg with your
+right-hand index finger once per second for 5 seconds.''
+
+More critically, in the second and third trials, participants will be
+instructed to pose smiles or express themselves normally for 5 seconds.
+This serves as our manipulation of Face Movement. Participants will be
+shown four images of actors trained to display prototypical expressions
+of happiness. These images were originally compiled from the Extended
+Cohn-Kanade Dataset (Lucey et al., 2010) and arranged in a single 2x2
+image matrix ({Coles et al.}, 2022). Participants will be asked to
+either (a) adopt the pictured expression, or (b) not attempt to control
+their face movements. Importantly, having participants view the same
+image matrix in both trials helps eliminate the potentially confounding
+effect that images of smiling people may have on emotional experience.
+Limiting the pose to 5 seconds helps ensure a similar duration as
+authentic emotional expressions (Ekman, 2003).
+
+During the two face movement trials, participants will encounter images
+previously validated to elicit either a positive or negative mood
+(Coles, 2020). This serves as our manipulation of Emotional Context. For
+positive contexts, participants will view images of flowers, kittens,
+and rainbows, arranged in a single 1 x 3 row. For negative contexts,
+they will view images of inconsiderately parked vehicles, acts of theft,
+and animal maltreatment (also arranged in a single row). Images will be
+displayed alongside an on-screen timer while participants complete the
+face movement task. While doing so, participants will be recorded
+through their webcam, which will be automatically toggled on and off by
+the survey program.
+
+Half of participants will be randomly assigned to complete the face
+movement task once before proceeding to the next trial, which serves as
+a conceptual replication of Coles et al. (2022). The other half of
+participants will be assigned to complete the task ten times. This
+serves as our manipulation of Repetition. Immediately after completing
+the face movement task (either once or ten times), participants will
+complete a modified Discrete Emotions Questionnaire, wherein they will
+report the extent to which they experienced a variety of emotions during
+the preceding trial (1 = Not at all, 7 = An extreme amount; Harmon-Jones
+et al. (2016)). Following Coles et al. (2022), we modified the
+questionnaire in three ways. First, to shorten the length, we limited
+ourselves to three items per subscale. Second, we replaced the original
+anger items (anger, rage, mad, and pissed off) with more moderate
+options (e.g., irritation). Third, we limited ourselves to three emotion
+subscales: happiness (three averaged items: happiness, satisfaction, and
+enjoyment), anger (irritation, aggravation, and annoyance), and fear
+(alarmed, scared, fear). Multiple emotion subscales were used to obscure
+our interest in any specific emotional state.
+
+The key outcome-of-interest is self-reported happiness. However, we will
+also explore effects on two other outcomes frequently discussed in the
+emotion labor literature: well-being and burnout. After self-reporting
+their emotions, participants will complete measures of satisfaction with
+life (e.g., ``In most ways my life is close to my ideal''; 1 = Strongly
+Disagree, 7 = Strongly Agree; Diener et al. (1985)) and burnout (e.g.,
+``To what extent to you feel hopeless''; 1 = Not at all, 7 = An extreme
+amount; Malach-Pines (2005)). Afterwards, participants will complete a
+simple filler math problem (e.g., 2+ 2 = ?). This is done to both (a)
+corroborate the cover story and (b) evaluate whether participants are
+paying attention.
+
+After completing all trials, participants will self-report their age,
+gender (Male, Female, Nonbinary; Garbarski et al. (2025)), and ethnicity
+(Revesz, 2024). Afterwards, participants will be asked two questions in
+a funnel debriefing. First, participants will simply be asked what they
+believe was the purpose of this study. Second, they will be informed
+that ``There are details about the purpose of this study that we have
+not yet told you about'' and asked to guess those details. Afterwards,
+participants will be fully debriefed.
+
+After the study is complete, we will evaluate how well participants
+completed the face movement tasks. To do so, we will use a commercially
+available emotion expression recognition model, Hume AI
+(\url{https://www.hume.ai/}). Like other emotion expression recognition
+models, Hume AI uses computer vision to track facial landmarks (e.g.,
+lips) associated with emotion expression (e.g., smiling) in each frame
+of a user-uploaded video. These features are passed through a
+pre-trained deep neural network to predict observer ratings of emotion
+(Cowen et al., 2021). To be clear, such models can fail to accurately
+infer peoples' subjective emotional experiences in complex and/or
+real-world scenarios (Cross et al., 2023). However, in relatively simple
+experimental contexts like ours, such models have been successfully
+deployed to identify non-smiling participants in an efficient and
+scalable manner (Coles, 2020; {Coles et al.}, 2022). In the present
+work, we will use Hume AI to generate moment-to-moment estimates of
+smiling-related activity using Facial Action Coding System
+classifications (Ekman \& Friesen, 1978). We will focus on Action Unit
+12 in particular (measured on a 0 -- 1 scale), which is associated with
+pulling the corner of the lips back towards the ear.
+
+\subsection{Measures}\label{measures}
+
+\section{Results}\label{results}
+
+As a reminder, our study deploys a 2 (Face Movement: pose smile, express
+naturally) x 2 (Emotional Context: positive, negative) x 2 (Movement
+Repetitions: one time, ten times) x 2 (Punishment threat: present,
+absent) design, with Face Movement manipulated within-subject.
+
+The emotion incongruence, repetition, and punishment hypotheses all
+predict a two-way interaction with Face Movement -- but differ in their
+proposed moderating factor. More specifically, the emotion incongruence
+hypothesis predicts a two-way interaction between Face Movement and
+Emotional Context, wherein there are only positive simple effects of
+Face Movement in positive contexts (Table 1). The repetition hypothesis
+predicts a two-way interaction between Face Movement and Movement
+Repetition, wherein Face Movement only has a positive simple effect when
+repeated once (Table 1). Last, the punishment hypothesis predicts a
+two-way interaction between Face Movement and Punishment, wherein there
+are only positive simple effects of Face Movement when there is no
+stated punishment for non-adherence (Table 1).
+
+\section{Discussion}\label{discussion}
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\protect\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-anwylirvine2020}
+Anwyl-Irvine, A. L., Massonnié, J., Flitton, A., Kirkham, N., \&
+Evershed, J. K. (2020). Gorilla in our midst: An online behavioral
+experiment builder. \emph{Behavior Research Methods}, \emph{52},
+388--407. \url{https://doi.org/10.3758/s13428-019-01237-x}
+
+\bibitem[\citeproctext]{ref-baker2025}
+Baker, J., Van der Donck, S., Boets, B., \& Korb, S. (2025). Increasing
+perceived happiness in neutral faces by posing a smile: An
+electroencephalography ({EEG}) frequency-tagging study. \emph{Emotion}.
+\url{https://doi.org/10.1037/emo0001514}
+
+\bibitem[\citeproctext]{ref-barrett2017}
+Barrett, L. F. (2017). The theory of constructed emotion: An active
+inference account of interoception and categorization. \emph{Social
+Cognitive and Affective Neuroscience}, \emph{12}(1), 1--23.
+\url{https://doi.org/10.1093/scan/nsw154}
+
+\bibitem[\citeproctext]{ref-boemo2022}
+Boemo, T., Nieto, I., Vazquez, C., \& Sanchez-Lopez, A. (2022).
+Relations between emotion regulation strategies and affect in daily
+life: A systematic review and meta-analysis of studies using ecological
+momentary assessments. \emph{Neuroscience \& Biobehavioral Reviews},
+\emph{139}, 104747.
+\url{https://doi.org/10.1016/j.neubiorev.2022.104747}
+
+\bibitem[\citeproctext]{ref-cacioppo1992}
+Cacioppo, J. T., Berntson, G. G., \& Klein, D. J. (1992). \emph{Emotion
+and social behavior}. Sage Publications, Inc.
+
+\bibitem[\citeproctext]{ref-chandwani2015}
+Chandwani, R., \& Sharma, D. (2015). \emph{Managing emotions: Emotional
+labor or emotional enrichment}. Indian Institute of Management.
+
+\bibitem[\citeproctext]{ref-cherry2014}
+Cherry, C. B. (2014). \emph{Loving {Mr. Daniels}}. CreateSpace
+Independent Publishing Platform.
+
+\bibitem[\citeproctext]{ref-chervonsky2017}
+Chervonsky, E., \& Hunt, C. (2017). Suppression and expression of
+emotion in social and interpersonal outcomes: A meta-analysis.
+\emph{Emotion}, \emph{17}(4), 669--683.
+\url{https://doi.org/10.1037/emo0000270}
+
+\bibitem[\citeproctext]{ref-choi2015}
+Choi, Y. G., \& Kim, K. S. (2015). A literature review of emotional
+labor and emotional labor strategies. \emph{Universal Journal of
+Management}, \emph{3}(7), 283--290.
+\url{https://doi.org/10.13189/ujm.2015.030704}
+
+\bibitem[\citeproctext]{ref-cole1954}
+Cole, N. K. (1954). \emph{Smile}. Song.
+
+\bibitem[\citeproctext]{ref-coles2020}
+Coles, N. A. (2020). \emph{Face and feeling: An examination of the role
+of facial feedback in emotion} {[}PhD thesis, University of
+Tennessee{]}. \url{https://trace.tennessee.edu/utk_graddiss/5874}
+
+\bibitem[\citeproctext]{ref-coles2023artifact}
+Coles, N. A., Gaertner, L., Frohlich, B., Larsen, J. T., \&
+Basnight-Brown, D. M. (2023). Fact or artifact? Demand characteristics
+and participants' beliefs can moderate, but do not fully account for,
+the effects of facial feedback on emotional experience. \emph{Journal of
+Personality and Social Psychology}, \emph{124}(2), 287.
+\url{https://doi.org/10.1037/pspa0000316}
+
+\bibitem[\citeproctext]{ref-coles2021eyebrows}
+Coles, N. A., \& Larsen, J. T. (2021). Claims about the effects of
+botulinum toxin on depression should raise some eyebrows. \emph{Journal
+of Psychiatric Research}, \emph{140}, 551--552.
+\url{https://doi.org/10.1016/j.jpsychires.2021.05.021}
+
+\bibitem[\citeproctext]{ref-coles2019botox}
+Coles, N. A., Larsen, J. T., Kuribayashi, J., \& Kuelz, A. (2019). Does
+blocking facial feedback via botulinum toxin injections decrease
+depression? A critical review and meta-analysis. \emph{Emotion Review},
+\emph{11}(4), 294--309. \url{https://doi.org/10.1177/1754073919868762}
+
+\bibitem[\citeproctext]{ref-coles2019meta}
+Coles, N. A., Larsen, J. T., \& Lench, H. C. (2019). A meta-analysis of
+the facial feedback literature: Effects of facial feedback on emotional
+experience are small and variable. \emph{Psychological Bulletin},
+\emph{145}(6), 610. \url{https://doi.org/10.1037/bul0000194}
+
+\bibitem[\citeproctext]{ref-coles2022}
+{Coles, N. A., March, D. S., Marmolejo-Ramos, F., Larsen, J. T., Arinze,
+N. C., Ndukaihe, I. L., et al.} (2022). A multi-lab test of the facial
+feedback hypothesis by the {Many Smiles Collaboration}. \emph{Nature
+Human Behaviour}, \emph{6}(12), 1731--1742.
+\url{https://doi.org/10.1038/s41562-022-01458-9}
+
+\bibitem[\citeproctext]{ref-coles2025}
+Coles, N. A., Wyatt, M., \& Frank, M. C. (2025). A meta-analysis of the
+impact and heterogeneity of explicit demand characteristics.
+\emph{Collabra: Psychology}, \emph{11}(1), 143005.
+\url{https://doi.org/10.1525/collabra.143005}
+
+\bibitem[\citeproctext]{ref-cowen2021}
+Cowen, A. S., Keltner, D., Schroff, F., Jou, B., Adam, H., \& Prasad, G.
+(2021). Sixteen facial expressions occur in similar contexts worldwide.
+\emph{Nature}, \emph{589}(7841), 251--257.
+\url{https://doi.org/10.1038/s41586-020-3037-7}
+
+\bibitem[\citeproctext]{ref-cross2023}
+Cross, M. P., Acevedo, A. M., \& Hunter, J. F. (2023). A critique of
+automated approaches to code facial expressions: What do researchers
+need to know? \emph{Affective Science}, \emph{4}(3), 500--505.
+\url{https://doi.org/10.1007/s42761-023-00195-0}
+
+\bibitem[\citeproctext]{ref-damasio2013}
+Damasio, A., \& Carvalho, G. B. (2013). The nature of feelings:
+Evolutionary and neurobiological origins. \emph{Nature Reviews
+Neuroscience}, \emph{14}(2), 143--152.
+\url{https://doi.org/10.1038/nrn3403}
+
+\bibitem[\citeproctext]{ref-diener1985}
+Diener, E., Emmons, R. A., Larsen, R. J., \& Griffin, S. (1985). The
+satisfaction with life scale. \emph{Journal of Personality Assessment},
+\emph{49}(1), 71--75. \url{https://doi.org/10.1207/s15327752jpa4901_13}
+
+\bibitem[\citeproctext]{ref-dryman2018}
+Dryman, M. T., \& Heimberg, R. G. (2018). Emotion regulation in social
+anxiety and depression: A systematic review of expressive suppression
+and cognitive reappraisal. \emph{Clinical Psychology Review}, \emph{65},
+17--42. \url{https://doi.org/10.1016/j.cpr.2018.07.004}
+
+\bibitem[\citeproctext]{ref-efthimiou2024happiness}
+Efthimiou, T.-N., Baker, J., Clarke, A., Elsenaar, A., Mehu, M., \&
+Korb, S. (2024). Zygomaticus activation through facial neuromuscular
+electrical stimulation ({fNMES}) induces happiness perception in
+ambiguous facial expressions and affects neural correlates of face
+processing. \emph{Social Cognitive and Affective Neuroscience},
+\emph{19}(1), nsae013. \url{https://doi.org/10.1093/scan/nsae013}
+
+\bibitem[\citeproctext]{ref-efthimiou2024smiling}
+Efthimiou, T.-N., Baker, J., Elsenaar, A., Mehu, M., \& Korb, S. (2024).
+Smiling and frowning induced by facial neuromuscular electrical
+stimulation ({fNMES}) modulate felt emotion and physiology.
+\emph{Emotion}. \url{https://doi.org/10.1037/emo0001408}
+
+\bibitem[\citeproctext]{ref-ekman2003}
+Ekman, P. (2003). Darwin, deception, and facial expression. \emph{Annals
+of the New York Academy of Sciences}, \emph{1000}(1), 205--221.
+\url{https://doi.org/10.1196/annals.1280.010}
+
+\bibitem[\citeproctext]{ref-ekman1978}
+Ekman, P., \& Friesen, W. V. (1978). \emph{Facial action coding system}.
+Environmental Psychology \& Nonverbal Behavior.
+\url{https://doi.org/10.1037/t27734-000}
+
+\bibitem[\citeproctext]{ref-feldman2024}
+Feldman, M., Bliss-Moreau, E., \& Lindquist, K. (2024). The neurobiology
+of interoception and affect. \emph{Trends in Cognitive Sciences}.
+\url{https://doi.org/10.1016/j.tics.2024.01.009}
+
+\bibitem[\citeproctext]{ref-fernandes2021}
+Fernandes, M. A., \& Tone, E. B. (2021). A systematic review and
+meta-analysis of the association between expressive suppression and
+positive affect. \emph{Clinical Psychology Review}, \emph{88}, 102068.
+\url{https://doi.org/10.1016/j.cpr.2021.102068}
+
+\bibitem[\citeproctext]{ref-galison1997}
+Galison, P. (1997). \emph{Image and logic: A material culture of
+microphysics}. University of Chicago Press.
+
+\bibitem[\citeproctext]{ref-garbarski2025}
+Garbarski, D., Dykema, J., Yonker, J. A., Bae, R. E., \& Rosenfeld, R.
+A. (2025). Improving the measurement of gender in surveys: Effects of
+categorical versus open-ended response formats on measurement and data
+quality among college students. \emph{Journal of Survey Statistics and
+Methodology}, \emph{13}(1), 18--38.
+\url{https://doi.org/10.1093/jssam/smae043}
+
+\bibitem[\citeproctext]{ref-grandey2015}
+Grandey, A. A., Rupp, D., \& Brice, W. N. (2015). Emotional labor
+threatens decent work: A proposal to eradicate emotional display rules.
+\emph{Journal of Organizational Behavior}, \emph{36}(6), 770--785.
+\url{https://doi.org/10.1002/job.2020}
+
+\bibitem[\citeproctext]{ref-gross1998}
+Gross, J. J. (1998). The emerging field of emotion regulation: An
+integrative review. \emph{Review of General Psychology}, \emph{2}(3),
+271--299. \url{https://doi.org/10.1037/1089-2680.2.3.271}
+
+\bibitem[\citeproctext]{ref-harmonjones2016}
+Harmon-Jones, C., Bastian, B., \& Harmon-Jones, E. (2016). The discrete
+emotions questionnaire: A new tool for measuring state self-reported
+emotions. \emph{PloS One}, \emph{11}(8), e0159915.
+\url{https://doi.org/10.1371/journal.pone.0159915}
+
+\bibitem[\citeproctext]{ref-hochschild1979}
+Hochschild, A. R. (1979). Emotion work, feeling rules, and social
+structure. \emph{American Journal of Sociology}, \emph{85}(3), 551--575.
+\url{https://www.jstor.org/stable/2778583}
+
+\bibitem[\citeproctext]{ref-hu2014}
+Hu, T., Zhang, D., Wang, J., Mistry, R., Ran, G., \& Wang, X. (2014).
+Relation between emotion regulation and mental health: A meta-analysis
+review. \emph{Psychological Reports}, \emph{114}(2), 341--362.
+\url{https://doi.org/10.1037/a0027600}
+
+\bibitem[\citeproctext]{ref-hulsheger2011}
+Hülsheger, U. R., \& Schewe, A. F. (2011). On the costs and benefits of
+emotional labor: A meta-analysis of three decades of research.
+\emph{Journal of Occupational Health Psychology}, \emph{16}(3), 361.
+\url{https://doi.org/10.1037/a0022876}
+
+\bibitem[\citeproctext]{ref-james1884}
+James, W. (1884). What is emotion? \emph{Mind}, \emph{8}, 188--205.
+\url{https://www.jstor.org/stable/2246769}
+
+\bibitem[\citeproctext]{ref-james1894}
+James, W. (1894). Discussion: The physical basis of emotion.
+\emph{Psychological Review}, \emph{1}, 516--529.
+\url{https://doi.org/10.1037/h0065078}
+
+\bibitem[\citeproctext]{ref-kraft2012}
+Kraft, T. L., \& Pressman, S. D. (2012). Grin and bear it: The influence
+of manipulated facial expression on the stress response.
+\emph{Psychological Science}, \emph{23}(11), 1372--1378.
+\url{https://doi.org/10.1177/0956797612445312}
+
+\bibitem[\citeproctext]{ref-lucey2010}
+Lucey, P., Cohn, J. F., Kanade, T., Saragih, J., Ambadar, Z., \&
+Matthews, I. (2010). The extended {Cohn-Kanade} dataset ({CK+}): A
+complete dataset for action unit and emotion-specified expression.
+\emph{2010 IEEE Computer Society Conference on Computer Vision and
+Pattern Recognition - Workshops}, 94--101.
+\url{https://doi.org/10.1109/CVPRW.2010.5543262}
+
+\bibitem[\citeproctext]{ref-luu2025}
+Luu, J. H., Acevedo, A. M., Pourmand, V., \& Pressman, S. D. (2025). The
+power of smiles: Mitigating pain through facial expression. \emph{The
+Journal of Positive Psychology}, 1--10.
+\url{https://doi.org/10.1080/17439760.2025.2462231}
+
+\bibitem[\citeproctext]{ref-malachpines2005}
+Malach-Pines, A. (2005). The burnout measure, short version.
+\emph{International Journal of Stress Management}, \emph{12}(1), 78--88.
+\url{https://doi.org/10.1037/1072-5245.12.1.78}
+
+\bibitem[\citeproctext]{ref-niedenthal2007}
+Niedenthal, P. M. (2007). Embodying emotion. \emph{Science},
+\emph{316}(5827), 1002--1005.
+\url{https://doi.org/10.1126/science.1136930}
+
+\bibitem[\citeproctext]{ref-noah2018}
+Noah, T., Schul, Y., \& Mayo, R. (2018). When both the original study
+and its failed replication are correct: Feeling observed eliminates the
+facial-feedback effect. \emph{Journal of Personality and Social
+Psychology}, \emph{114}(5), 657.
+\url{https://doi.org/10.1037/pspa0000121}
+
+\bibitem[\citeproctext]{ref-orne1962}
+Orne, M. T. (1962). On the social psychology of the psychological
+experiment: With particular reference to demand characteristics and
+their implications. \emph{American Psychologist}, \emph{17}(11),
+776--783. \url{https://doi.org/10.1037/h0043424}
+
+\bibitem[\citeproctext]{ref-pressman2021}
+Pressman, S. D., Acevedo, A. M., Hammond, K. V., \& Kraft-Feil, T. L.
+(2021). Smile (or grimace) through the pain? The effects of
+experimentally manipulated facial expressions on needle-injection
+responses. \emph{Emotion}, \emph{21}(6), 1188.
+\url{https://doi.org/10.1037/emo0000913}
+
+\bibitem[\citeproctext]{ref-revesz2024}
+Revesz, R. L. (2024). \emph{Revisions to {OMB}'s statistical policy
+directive no. 15: Standards for maintaining, collecting, and presenting
+federal data on race and ethnicity}. Federal Register.
+
+\bibitem[\citeproctext]{ref-roche2018}
+Roche, J. M., \& Arnold, H. S. (2018). The effects of emotion
+suppression during language planning and production. \emph{Journal of
+Speech, Language, and Hearing Research}, \emph{61}(8), 2076--2083.
+\url{https://doi.org/10.1044/2018_JSLHR-L-17-0232}
+
+\bibitem[\citeproctext]{ref-scherer2019}
+Scherer, K. R., \& Moors, A. (2019). The emotion process: Event
+appraisal and component differentiation. \emph{Annual Review of
+Psychology}, \emph{70}(1), 719--745.
+\url{https://doi.org/10.1146/annurev-psych-122216-011854}
+
+\bibitem[\citeproctext]{ref-schulze2021}
+Schulze, J., Neumann, I., Magid, M., Finzi, E., Sinke, C., Wollmer, M.
+A., \& Krüger, T. H. (2021). Botulinum toxin for the management of
+depression: An updated review of the evidence and meta-analysis.
+\emph{Journal of Psychiatric Research}, \emph{135}, 332--340.
+\url{https://doi.org/10.15698/mic2021.02.741}
+
+\bibitem[\citeproctext]{ref-smith2007}
+Smith, T. W. (2007). \emph{Job satisfaction in the {United States}}.
+National Opinion Research Center, University of Chicago.
+
+\bibitem[\citeproctext]{ref-tomkins1962}
+Tomkins, S. (1962). \emph{Affect imagery consciousness: Volume {I}: The
+positive affects}. Springer Publishing Company.
+
+\bibitem[\citeproctext]{ref-visted2018}
+Visted, E., Vøllestad, J., Nielsen, M. B., \& Schanche, E. (2018).
+Emotion regulation in current and remitted depression: A systematic
+review and meta-analysis. \emph{Frontiers in Psychology}, \emph{9}, 756.
+\url{https://doi.org/10.3389/fpsyg.2018.00756}
+
+\bibitem[\citeproctext]{ref-wagenmakers2016}
+{Wagenmakers, E.-J., Beek, T., Dijkhoff, L., Gronau, Q. F., Acosta, A.,
+Adams Jr, R. B., et al.} (2016). Registered replication report: {Strack,
+Martin, \& Stepper (1988)}. \emph{Perspectives on Psychological
+Science}, \emph{11}(6), 917--928.
+\url{https://doi.org/10.1177/1745691616674458}
+
+\bibitem[\citeproctext]{ref-webb2012}
+Webb, T. L., Miles, E., \& Sheeran, P. (2012). Dealing with feeling: A
+meta-analysis of the effectiveness of strategies derived from the
+process model of emotion regulation. \emph{Psychological Bulletin},
+\emph{138}(4), 775. \url{https://doi.org/10.1037/a0027600}
+
+\bibitem[\citeproctext]{ref-wollmer2022}
+Wollmer, M. A., Magid, M., Kruger, T. H., \& Finzi, E. (2022). Treatment
+of depression with botulinum toxin. \emph{Toxins}, \emph{14}(6), 383.
+\url{https://doi.org/10.3390/toxins14060383}
+
+\bibitem[\citeproctext]{ref-wood2016}
+Wood, A., Rychlowska, M., Korb, S., \& Niedenthal, P. (2016). Fashioning
+the face: Sensorimotor simulation contributes to facial expression
+recognition. \emph{Trends in Cognitive Sciences}, \emph{20}(3),
+227--240. \url{https://doi.org/10.1016/j.tics.2015.12.010}
+
+\bibitem[\citeproctext]{ref-yu2023}
+Yu, C.-W. F., Haase, C. M., \& Chang, J.-H. (2023). Habitual expressive
+suppression of positive, but not negative, emotions consistently
+predicts lower well-being across two culturally distinct regions.
+\emph{Affective Science}, \emph{4}(4), 684--701.
+\url{https://doi.org/10.1007/s42761-023-00221-1}
+
+\bibitem[\citeproctext]{ref-zapf2021}
+Zapf, D., Kern, M., Tschan, F., Holman, D., \& Semmer, N. K. (2021).
+Emotion work: A work psychology perspective. \emph{Annual Review of
+Organizational Psychology and Organizational Behavior}, \emph{8}(1),
+139--172. \url{https://doi.org/10.1146/annurev-orgpsych-012420-062451}
+
+\bibitem[\citeproctext]{ref-zhu2021}
+Zhu, C., Jiang, Y., Wang, Y., Liu, D., \& Luo, W. (2021). Arithmetic
+performance is modulated by cognitive reappraisal and expression
+suppression: Evidence from behavioral and {ERP} findings.
+\emph{Neuropsychologia}, \emph{162}, 108060.
+\url{https://doi.org/10.1016/j.neuropsychologia.2021.108060}
+
+\end{CSLReferences}
+
+
+
+
+\end{document}

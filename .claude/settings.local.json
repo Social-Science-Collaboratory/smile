@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(quarto preview \"c:/Users/`$p&radmin`$/Documents/GitHub/smile/writing/smiling_final.qmd\")"
+    ]
+  }
+}
