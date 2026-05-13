@@ -8,14 +8,12 @@ author:
     address       : "945 Center Dr, Gainesville, FL 32611"
     email         : "ncoles@ufl.edu"
   - name          : "Annabel Dang"
-    affiliation   : "2"
+    affiliation   : "1"
   - name          : "Joao Francisco Goes Braga Takayanagi"
     affiliation   : "1"
 affiliation:
   - id            : "1"
     institution   : "University of Florida, Department of Psychology"
-  - id            : "2"
-    institution   : "University of California, San Diego, Department of Psychology"
 authornote: |
 abstract: |
   
