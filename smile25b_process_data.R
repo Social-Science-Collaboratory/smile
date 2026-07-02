@@ -1,7 +1,11 @@
 # Load libraries
 library(tidyverse)
 
-# Initial processing: compile questionnaires, remove participants who did not consent to sharing data, and remove identifying variables
+# Initial processing: 
+# - compile questionnaires 
+# - remove participants who did not consent to data sharing
+# - Merge Prolific demographic data
+# - remove identifying information (Prolific ID)
 
 # List gorilla questionnaire .csv files across the data batch folders
 questionnaire_list <- Sys.glob(
@@ -19,8 +23,6 @@ df <- lapply(
   ) %>%
 bind_rows()
 
-# Remove participants who did not consent to sharing their data
-
 ## Check participants who did not consent to participate in the study
 table(df$`ConsentForm object-8 Response`)
 
@@ -37,13 +39,36 @@ no_consent_list <- df %>%
 df <- df %>%
   filter(!(`Participant Private ID` %in% no_consent_list$Gorilla_ID))
 
-## Remove Prolific ID information
-df <- df %>%
-  select(-`Participant Public ID`)
+## Pull demographic data from Prolific
+demo_data <- read_csv(
+  file.path("data", "gorilla_survey", "smile25b_prolific_demographic.csv")) %>%
+  filter(Status == "APPROVED") %>%
+  select(`Participant id`, `Ethnicity simplified`) %>%
+  rename(Prolific_ID = `Participant id`,
+         Ethnicity = `Ethnicity simplified`) %>%
+  mutate(Ethnicity = ifelse(
+    Ethnicity == "DATA_EXPIRED",
+    NA, Ethnicity)
+  )
 
-# Save and optionally reload raw data
+# Rename Prolific ID column to match demographic data
+df <- df %>%
+  rename(Prolific_ID = `Participant Public ID`)
+
+# Join prolific demographic data into dataframe
+df <- left_join( df, demo_data, by = "Prolific_ID")
+
+## Remove Prolific ID information from dataframe
+df <- df %>%
+  select(-`Prolific_ID`)
+
+# Clean workspace
+rm(no_consent_list, demo_data)
+
+# Save raw data
 write_csv(df, "data/smile25b_raw_data.csv")
-# reload
+
+# Optionally reload raw data
 df <- read_csv("data/smile25b_raw_data.csv")
 
 # Select variables of interest
@@ -51,13 +76,13 @@ df <- df %>%
   select(
     `Local Date and Time`,
     `Experiment Version`,
-    `Task Name`,
     `Participant Private ID`,
     `Participant Status`,
     `randomiser-7z4z`,
     `randomiser-e9dd`,
     `ConsentForm object-8 Response`,
-    `Fill1pos_math1 object-2 Value`:`Multiple Choice object-21 Response`
+    `Fill1pos_math1 object-2 Value`:`Multiple Choice object-21 Response`,
+    Ethnicity
   )
 
 # Rename metadata and filler condition variables
@@ -65,7 +90,6 @@ df <- df %>%
   rename(
     DateTime = `Local Date and Time`,
     ExperimentVersion = `Experiment Version`,
-    Task = `Task Name`,
     Gorilla_ID = `Participant Private ID`,
     Status = `Participant Status`,
     threat = `randomiser-7z4z`,
@@ -126,7 +150,6 @@ df <- df %>%
     Data_consent = `Data_consent object-14 Response`,
     Display_check = `Multiple Choice object-21 Response`
   )
-
 
 
 # Outcome variable data is spread across different Gorilla task blocks due to the randomization/branching pipeline
@@ -212,7 +235,7 @@ df <- df %>%
   # Reorder variables in the dataframe
   relocate(context, repetition,
      .after = group) %>%
-  relocate(Purpose, Concealment, Age, Gender, Quality_issues, Data_consent, Display_check,
+  relocate(Purpose, Concealment, Age, Gender, Ethnicity, Quality_issues, Data_consent, Display_check,
     .after = last_col()) %>%
   # Convert outcome variables to numeric
   mutate(across(Fill1pos_math1:NP_math4, as.numeric))
@@ -283,16 +306,25 @@ for (pfx in task_prefixes) {
   }
 }
 
+# Clean worksapce
+rm(task_prefixes, deq_happy_items, deq_anger_items, deq_fear_items,
+   anger_cols, fear_cols, happy_cols, swl_items, burnout_items, 
+   pfx, cols, composite_col)
+
 # Pull facial expression compliance data from OpenFace processing code
 openface_results <- read_csv("data/smile25b_openface_processed.csv") |>
-  select(Gorilla_ID, face_compliance_scalar, face_compliance_binary) %>%
+  select(Gorilla_ID, face_compliance_scalar, face_compliance_scalar_soft, face_compliance_binary) %>%
   mutate(Gorilla_ID = as.numeric(Gorilla_ID))
 
 # Join openface compliance data with main data frame
 df <- left_join(df, openface_results, by = "Gorilla_ID")
 
+# Clean workspace
+rm(openface_results)
+
 # Check math problem solving accuracy
 
+# Create a list with the correct answers
 math_sol <- c(
   Fill1pos_math1 = 4,
   Fill1pos_math2 = 2,
@@ -315,9 +347,7 @@ math_sol <- c(
   NP_math4 = 7
 )
 
-# Count math errors per participant by comparing each math_sol column to its
-# expected solution row by row. NAs (unanswered/incomplete blocks) count as
-# mistakes.
+# Count math errors per participant by comparing each math_sol column to its expected solution
 df <- df %>%
   mutate(
     math_errors = rowSums(
@@ -327,6 +357,9 @@ df <- df %>%
       )
     )
   )
+
+# Clean workspace
+rm(math_sol)
 
 # Save processed data file
 write_csv(df, "data/smile25b_processed_data.csv")
