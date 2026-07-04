@@ -167,7 +167,11 @@ happy_dumbbell_plot <- ggplot() +
     title = "Happiness by Posed Expression across Conditions"
   ) +
   # Set theme and font size
-  theme_minimal(base_size = 16)
+  theme_minimal(base_size = 16) +
+  theme(
+    panel.background = element_rect(fill = "white", colour = "white"),
+    plot.background = element_rect(fill = "white", colour = "white")
+  )
 
 print(happy_dumbbell_plot)
 
