@@ -293,7 +293,7 @@ happy_dumbbell_plot <- ggplot() +
   labs(
     x = "Happiness",
     y = "Context | Threat | Repetition",
-    color = "Paired t-test",
+    color = "Smile vs. Natural contrast",
     shape = "Pose",
     fill = "Pose",
     title = "Happiness by Posed Expression across Conditions"
