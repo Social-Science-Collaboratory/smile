@@ -361,5 +361,21 @@ df <- df %>%
 # Clean workspace
 rm(math_sol)
 
+# Prepare dataset for the manual check of study purpose awareness (deception manipulation check)
+
+awareness_df <- df %>%
+  select(Gorilla_ID, Purpose, Concealment) %>%
+  mutate(awareness_check_R1 = "", awareness_check_R2 = "")
+
+write_csv(awareness_df, "data/smile25b_awareness_check_pending.csv")
+
+# Read completed awarenes check and join to the main data frame
+
+# awareness_completed_df <- read_csv("data/smile25b_awareness_check_completed.csv") %>%
+#  select(Gorilla_ID, awareness_check)
+
+# df <- df %>%
+#  left_join(awareness_completed_df, by = "Gorilla_ID")
+
 # Save processed data file
 write_csv(df, "data/smile25b_processed_data.csv")
