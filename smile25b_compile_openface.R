@@ -87,13 +87,6 @@ openface_results_summ <- openface_results |>
             TRUE,
             FALSE
         ),
-        face_compliance_scalar_soft = ifelse(
-            (face_detection_natura > 0.8 &
-            face_detection_smile > 0.8 &
-            AU12_scalar_smile - AU12_scalar_natura >= 0.5),
-            TRUE,
-            FALSE
-        ),
         face_compliance_binary = ifelse(
             (face_detection_natura > 0.8 &
             face_detection_smile > 0.8 &
@@ -107,9 +100,6 @@ openface_results_summ <- openface_results |>
 # Check openface compliance distribution
 # Scalar (1.5 out 5 difference in smile vs natural conditions)
 table(openface_results_summ$face_compliance_scalar)
-
-# Scalar soft (0.5 out 5 difference in smile vs natural conditions)
-table(openface_results_summ$face_compliance_scalar_soft)
 
 # Binary categorization (True vs False)
 table(openface_results_summ$face_compliance_binary)

@@ -313,7 +313,7 @@ rm(task_prefixes, deq_happy_items, deq_anger_items, deq_fear_items,
 
 # Pull facial expression compliance data from OpenFace processing code
 openface_results <- read_csv("data/smile25b_openface_processed.csv") |>
-  select(Gorilla_ID, face_compliance_scalar, face_compliance_scalar_soft, face_compliance_binary) %>%
+  select(Gorilla_ID, face_compliance_scalar, face_compliance_binary) %>%
   mutate(Gorilla_ID = as.numeric(Gorilla_ID))
 
 # Join openface compliance data with main data frame
@@ -371,11 +371,11 @@ write_csv(awareness_df, "data/smile25b_awareness_check_pending.csv")
 
 # Read completed awarenes check and join to the main data frame
 
-# awareness_completed_df <- read_csv("data/smile25b_awareness_check_completed.csv") %>%
-#  select(Gorilla_ID, awareness_check)
+awareness_completed_df <- read_csv("data/smile25b_awareness_check_completed.csv") %>%
+  select(Gorilla_ID, joint_awareness_check)
 
-# df <- df %>%
-#  left_join(awareness_completed_df, by = "Gorilla_ID")
+df <- df %>%
+  left_join(awareness_completed_df, by = "Gorilla_ID")
 
 # Save processed data file
 write_csv(df, "data/smile25b_processed_data.csv")
