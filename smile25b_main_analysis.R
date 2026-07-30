@@ -68,10 +68,14 @@ happy_emm <- emmeans(happy_model, ~ pose | context + threat + repetition)
 
 summary(happy_emm)
 
+happy_start_time <- Sys.time()
+
 # Compute Bayes Factor anova for the DEQ Happiness scores with the custom function 'compute_bf_anova'
 happy_bf_anova <- compute_bf_anova(
   df_long = df_long, 
   outcome = "DEQ_happy_total")
+
+print(happy_execution_time <- Sys.time() - happy_start_time)
 
 # Save and optionally reload Bayesian ANOVA results
 saveRDS(happy_bf_anova, "data/main_analysis/smile25b_happy_bf_anova.Rds")
@@ -143,7 +147,7 @@ df_sens_long <- df_sens_wide %>%
   mutate(id = row_number()) %>%
   select(
     id, threat, context, repetition,
-    SP_DEQ_happy_total, SP_DEQ_fear_total) %>%
+    SP_DEQ_happy_total, NP_DEQ_happy_total) %>%
   ## Pivot smile and natural pose columns into long format
   pivot_longer(
     cols = c(starts_with("SP_"), starts_with("NP_")),
@@ -172,8 +176,12 @@ happy_sens_emm <- emmeans(happy_sens_model, ~ pose | context + threat + repetiti
 
 summary(happy_sens_emm)
 
+happy_sens_start_time <- Sys.time()
+
 # Compute Bayes Factor anova for the DEQ Happiness scores with the custom function 'compute_bf_anova'
 happy_sens_bf_anova <- compute_bf_anova(df_sens_long, "DEQ_happy_total")
+
+print(happy_sens_execution_time <- Sys.time() - happy_sens_start_time)
 
 # Save and optionally reload Bayesian ANOVA results
 saveRDS(happy_sens_bf_anova, "data/main_analysis/smile25b_happy_sens_bf_anova.Rds")
@@ -190,7 +198,7 @@ happy_sens_bf_anova_table %>%
   print()
 
 # Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
-happy_sens_simple_effects <- compute_bf_simple_effects(df, "DEQ_happy_total")
+happy_sens_simple_effects <- compute_bf_simple_effects(df_sens_wide, "DEQ_happy_total")
 
 print(happy_sens_simple_effects)
 
@@ -203,7 +211,7 @@ happy_sens_plot_data <- prepare_plot_data(
 # Draw the dumbbell plot with the custom function 'draw_dumbell_plot'
 happy_sens_dumbbell_plot <- draw_dumbbell_plot(
   plot_data = happy_sens_plot_data, 
-  outcome_label = "Happiness",
+  outcome_label = "Sensitivity analysis: Happiness",
   color_natural = "#316ac6",
   color_smile = "#f5ad06"
 )
@@ -211,7 +219,7 @@ happy_sens_dumbbell_plot <- draw_dumbbell_plot(
 # Save plot to figures folder
 ggsave(
   "figures/smile25b_happy_sens_dumbbell_plot.png",
-  plot = happy_dumbbell_plot,
+  plot = happy_sens_dumbbell_plot,
   width = 15, height = 8, dpi = 300
   )
 

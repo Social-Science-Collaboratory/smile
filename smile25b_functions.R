@@ -100,10 +100,11 @@ compute_bf_simple_effects <- function(df_wide, outcome) {
     distinct(context, threat, repetition) %>%
     # remove any combinations that contain NAs
     drop_na(context, threat, repetition) %>%
+    arrange(context, threat, repetition) %>%
     mutate(
       # For each condition combination, extract cases with complete outcome scores
       result = pmap(list(context, threat, repetition), function(ctx, thr, rep) {
-        cell_data <- df %>%
+        cell_data <- df_wide  %>%
           filter(context == ctx, threat == thr, repetition == rep) %>%
           drop_na(all_of(SP_outcome), all_of(NP_outcome))
 
@@ -156,8 +157,8 @@ prepare_plot_data <- function(outcome_emm, outcome_simple_effects) {
       context_label = str_to_title(context),
       threat_label = threat,
       repetition_label = if_else(repetition == "one", "One time", "Ten times"),
-      condition = paste(context_label, threat_label, repetition_label, sep = " | "),
-      condition = fct_reorder(condition, diff_mean),
+      condition = paste(context_label,  repetition_label, threat_label, sep = " | "),
+      condition = factor(condition, levels = rev(sort(unique(condition)))),
       sig_label = case_when(
       p.value < .05 & diff_mean > 0 ~ "Smile > Natural (p < .05)",
       p.value < .05 & diff_mean < 0 ~ "Natural > Smile (p < .05)",
@@ -237,14 +238,14 @@ draw_dumbbell_plot <- function(plot_data, outcome_label, color_natural, color_sm
     # Configure axis and legend labels
     labs(
       x = outcome_label,
-      y = "Context | Threat | Repetition",
+      y = "Context | Repetition | Threat",
       color = "Smile vs. Natural contrast",
       shape = "Pose",
       fill = "Pose",
       title = paste0(outcome_label, " by Posed Expression across Conditions")
       ) +
     # Fix the x-axis range to leave enough room for the BF labels
-    scale_x_continuous(limits = c(1, 5.5)) +
+    scale_x_continuous(expand = expansion(add = c(0.5, 2.5))) +
     # Set theme and font size
     theme_minimal(base_size = 16) +
     theme(

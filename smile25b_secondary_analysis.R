@@ -7,6 +7,11 @@ library(BayesFactor)
 # Source functions used in the Bayesian analyses and figure generation
 source("smile25b_functions.R")
 
+# Create secondary analysis folder (if it doesn't exist)
+if (!dir.exists("data/secondary_analysis")) {
+  dir.create("data/secondary_analysis")
+}
+
 # read processed data set
 df <- read_csv("data/smile25b_processed_data.csv")
 
