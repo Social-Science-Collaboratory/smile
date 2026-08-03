@@ -141,6 +141,9 @@ df_sens_wide <- df %>%
     joint_awareness_check == FALSE
   )
 
+# Check number of cases that meet the sensitivity filter
+nrow(df_sens_wide)
+
 # Convert to long format
 df_sens_long <- df_sens_wide %>%
   ## create a unique participant id
