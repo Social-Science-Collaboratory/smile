@@ -146,12 +146,97 @@ Burnout_dumbbell_plot <- draw_dumbbell_plot(
   plot_data = Burnout_plot_data, 
   outcome_label = "Burnout",
   color_natural = "#316ac6",
-  color_smile = "#FF0000"
+  color_smile = "#AA00FF"
 )
 
 # Save plot to figures folder
 ggsave(
   "figures/smile25b_Burnout_dumbbell_plot.png",
   plot = Burnout_dumbbell_plot,
+  width = 15, height = 8, dpi = 300
+  )
+
+
+# Exploratory analysis: Outcome = fear, dataset = full
+
+# Full factorial general linear mixed model of fear predicted by pose, context, threat, and repetition
+fear_model <- lmer(
+  DEQ_fear_total ~ pose * context * threat * repetition + (1 | id),
+  data = df_long
+)
+
+print(summary(fear_model))
+
+# Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
+fear_emm <- emmeans(fear_model, ~ pose | context + threat + repetition)
+
+summary(fear_emm)
+
+# Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
+fear_simple_effects <- compute_bf_simple_effects(
+  df_wide = df, 
+  outcome = "DEQ_fear_total")
+
+print(fear_simple_effects)
+
+# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
+fear_plot_data <- prepare_plot_data(
+  outcome_emm = fear_emm,
+  outcome_simple_effects = fear_simple_effects
+)
+
+# Draw the dumbbell plot using the happiness score plot data with the custom function 'draw_dumbbell_plot'
+fear_dumbbell_plot <- draw_dumbbell_plot(
+  plot_data = fear_plot_data, 
+  outcome_label = "Fear",
+  color_natural = "#316ac6",
+  color_smile = "#FFA500"
+)
+  
+ggsave(
+  "figures/smile25b_fear_dumbbell_plot.png",
+  plot = fear_dumbbell_plot,
+  width = 15, height = 8, dpi = 300
+  )
+
+# Exploratory analysis: Outcome = anger, dataset = full
+
+# Full factorial general linear mixed model of anger predicted by pose, context, threat, and repetition
+anger_model <- lmer(
+  DEQ_anger_total ~ pose * context * threat * repetition + (1 | id),
+  data = df_long
+)
+
+print(summary(anger_model))
+
+# Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
+anger_emm <- emmeans(anger_model, ~ pose | context + threat + repetition)
+
+summary(anger_emm)
+
+# Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
+anger_simple_effects <- compute_bf_simple_effects(
+  df_wide = df, 
+  outcome = "DEQ_anger_total")
+
+print(anger_simple_effects)
+
+# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
+anger_plot_data <- prepare_plot_data(
+  outcome_emm = anger_emm,
+  outcome_simple_effects = anger_simple_effects
+)
+
+# Draw the dumbbell plot using the happiness score plot data with the custom function 'draw_dumbbell_plot'
+anger_dumbbell_plot <- draw_dumbbell_plot(
+  plot_data = anger_plot_data, 
+  outcome_label = "Anger",
+  color_natural = "#316ac6",
+  color_smile = "#FF0000"
+)
+  
+ggsave(
+  "figures/smile25b_anger_dumbbell_plot.png",
+  plot = fear_dumbbell_plot,
   width = 15, height = 8, dpi = 300
   )
