@@ -237,6 +237,6 @@ anger_dumbbell_plot <- draw_dumbbell_plot(
   
 ggsave(
   "figures/smile25b_anger_dumbbell_plot.png",
-  plot = fear_dumbbell_plot,
+  plot = anger_dumbbell_plot,
   width = 15, height = 8, dpi = 300
   )
