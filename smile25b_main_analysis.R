@@ -61,6 +61,8 @@ happy_model <- lmer(
   data = df_long
 )
 
+anova(happy_model)
+
 print(summary(happy_model))
 
 # Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
@@ -144,6 +146,9 @@ df_sens_wide <- df %>%
 # Check number of cases that meet the sensitivity filter
 nrow(df_sens_wide)
 
+# Look at the number of participants in each condition
+table(df_sens_wide$context, df_sens_wide$repetition, df_sens_wide$threat)
+
 # Convert to long format
 df_sens_long <- df_sens_wide %>%
   ## create a unique participant id
@@ -171,7 +176,9 @@ happy_sens_model <- lmer(
   data = df_sens_long
 )
 
-# Save plot to figures folder
+anova(happy_sens_model)
+
+# print model coefficient estimates
 print(summary(happy_sens_model))
 
 # Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
@@ -226,3 +233,106 @@ ggsave(
   width = 15, height = 8, dpi = 300
   )
 
+## Sensitivity analysis with less stringent scalar coding
+
+# Prepare data for sensitivity analysis
+df_sens_soft_wide <- df %>%
+  filter(
+    # Filter participants who complied with facial expression instructions
+    AU12_scalar_smile - AU12_scalar_natura >= 0.5,
+    face_detection_natura >= 0.8 & face_detection_smile >= 0.8,
+    # With no math errors
+    math_errors == 0,
+    # Who were not aware of the study's true purpose
+    joint_awareness_check == FALSE
+  )
+
+# Check number of cases that meet the sensitivity filter
+nrow(df_sens_soft_wide)
+
+# Look at the number of participants in each condition
+table(df_sens_soft_wide$context, df_sens_soft_wide$repetition, df_sens_soft_wide$threat)
+
+# Convert to long format
+df_sens_soft_long <- df_sens_soft_wide %>%
+  ## create a unique participant id
+  mutate(id = row_number()) %>%
+  select(
+    id, threat, context, repetition,
+    SP_DEQ_happy_total, NP_DEQ_happy_total) %>%
+  ## Pivot smile and natural pose columns into long format
+  pivot_longer(
+    cols = c(starts_with("SP_"), starts_with("NP_")),
+    names_to = c("pose", ".value"),
+    names_pattern = "^(SP|NP)_(.*)$"
+  ) %>%
+  ## recode pose variable into readable labels
+  mutate(pose = case_when(
+    pose == "SP" ~ "smile",
+    pose == "NP" ~ "natural",
+    TRUE ~ pose)
+  ) %>%
+  relocate(pose, .after = id)
+
+# Full factorial general linear mixed model of happiness predicted by pose, context, threat, and repetition
+happy_sens_soft_model <- lmer(
+  DEQ_happy_total ~ pose * context * threat * repetition + (1 | id),
+  data = df_sens_soft_long
+)
+
+anova(happy_sens_soft_model)
+
+# print model coefficient estimates
+print(summary(happy_sens_soft_model))
+
+# Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
+happy_sens_soft_emm <- emmeans(happy_sens_soft_model, ~ pose | context + threat + repetition)
+
+summary(happy_sens_soft_emm)
+
+print(happy_sens_soft_start_time <- Sys.time())
+
+# Compute Bayes Factor anova for the DEQ Happiness scores with the custom function 'compute_bf_anova'
+happy_sens_soft_bf_anova <- compute_bf_anova(df_sens_soft_long, "DEQ_happy_total")
+
+print(happy_sens_soft_execution_time <- Sys.time() - happy_sens_soft_start_time)
+
+# Save and optionally reload Bayesian ANOVA results
+saveRDS(happy_sens_soft_bf_anova, "data/main_analysis/smile25b_happy_sens_soft_bf_anova.Rds")
+happy_sens_soft_bf_anova <- readRDS("data/main_analysis/smile25b_happy_sens_soft_bf_anova.Rds")
+
+# Extract Bayes Factor ANOVA estimates with the custom function 'extract_bf_anova'
+happy_sens_soft_bf_anova_table <- extract_bf_anova(happy_sens_soft_bf_anova)
+
+print(happy_sens_soft_bf_anova_table)
+
+# Highlight the pre-registered two-way interactions
+happy_sens_soft_bf_anova_table %>%
+  filter(term_dropped %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+  print()
+
+# Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
+happy_sens_soft_simple_effects <- compute_bf_simple_effects(df_sens_soft_wide, "DEQ_happy_total")
+
+print(happy_sens_soft_simple_effects)
+
+# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
+happy_sens_soft_plot_data <- prepare_plot_data(
+  outcome_emm = happy_sens_soft_emm,
+  outcome_simple_effects = happy_sens_soft_simple_effects
+)
+
+# Draw the dumbbell plot with the custom function 'draw_dumbell_plot'
+happy_sens_soft_dumbbell_plot <- draw_dumbbell_plot(
+  plot_data = happy_sens_soft_plot_data, 
+  outcome_label = "Sensitivity analysis: Happiness",
+  color_natural = "#316ac6",
+  color_smile = "#f5ad06"
+)
+
+# Save plot to figures folder
+ggsave(
+  "figures/smile25b_happy_sens_soft_dumbbell_plot.png",
+  plot = happy_sens_soft_dumbbell_plot,
+  width = 15, height = 8, dpi = 300
+  )

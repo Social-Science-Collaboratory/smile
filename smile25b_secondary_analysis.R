@@ -56,8 +56,12 @@ SWL_emm <- emmeans(SWL_model, ~ pose | context + threat + repetition)
 
 summary(SWL_emm)
 
+print(SWL_start_time <- Sys.time())
+
 # Compute Bayes Factor anova for the SWL scores using the custom function 'compute_bf_anova'
 SWL_bf_anova <- compute_bf_anova(df_long, "SWL_total")
+
+print(SWL_execution_time <- Sys.time() - SWL_start_time)
 
 # Save and optionally reload Bayesian ANOVA results
 saveRDS(SWL_bf_anova, "data/secondary_analysis/smile25b_SWL_bf_anova.Rds")
@@ -113,8 +117,12 @@ Burnout_emm <- emmeans(Burnout_model, ~ pose | context + threat + repetition)
 
 summary(Burnout_emm)
 
+print(Burnout_start_time <- Sys.time())
+
 # Compute Bayes Factor anova for the Burnout scores using the custom function 'compute_bf_anova'
 Burnout_bf_anova <- compute_bf_anova(df_long, "Burnout_total")
+
+print(Burnout_execution_time <- Sys.time() - Burnout_start_time)
 
 # Save and optionally reload Bayesian ANOVA results
 saveRDS(Burnout_bf_anova, "data/secondary_analysis/smile25b_Burnout_bf_anova.Rds")
@@ -156,7 +164,6 @@ ggsave(
   width = 15, height = 8, dpi = 300
   )
 
-
 # Exploratory analysis: Outcome = fear, dataset = full
 
 # Full factorial general linear mixed model of fear predicted by pose, context, threat, and repetition
@@ -171,6 +178,20 @@ print(summary(fear_model))
 fear_emm <- emmeans(fear_model, ~ pose | context + threat + repetition)
 
 summary(fear_emm)
+
+print(fear_start_time <- Sys.time())
+
+# Compute Bayes Factor anova for the Fear scores using the custom function 'compute_bf_anova'
+fear_bf_anova <- compute_bf_anova(df_long, "DEQ_fear_total")
+
+print(fear_execution_time <- Sys.time() - fear_start_time)
+
+# Save and optionally reload Bayesian ANOVA results
+saveRDS(fear_bf_anova, "data/secondary_analysis/smile25b_fear_bf_anova.Rds")
+fear_bf_anova <- readRDS("data/secondary_analysis/smile25b_fear_bf_anova.Rds")
+
+# Extract Bayes Factor ANOVA estimates with the custom function 'extract_bf_anova'
+fear_bf_anova_table <- extract_bf_anova(fear_bf_anova)
 
 # Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
 fear_simple_effects <- compute_bf_simple_effects(
@@ -213,6 +234,20 @@ print(summary(anger_model))
 anger_emm <- emmeans(anger_model, ~ pose | context + threat + repetition)
 
 summary(anger_emm)
+
+print(anger_start_time <- Sys.time())
+
+# Compute Bayes Factor anova for the Fear scores using the custom function 'compute_bf_anova'
+anger_bf_anova <- compute_bf_anova(df_long, "DEQ_anger_total")
+
+print(anger_execution_time <- Sys.time() - anger_start_time)
+
+# Save and optionally reload Bayesian ANOVA results
+saveRDS(anger_bf_anova, "data/secondary_analysis/smile25b_anger_bf_anova.Rds")
+anger_bf_anova <- readRDS("data/secondary_analysis/smile25b_anger_bf_anova.Rds")
+
+# Extract Bayes Factor ANOVA estimates with the custom function 'extract_bf_anova'
+anger_bf_anova_table <- extract_bf_anova(anger_bf_anova)
 
 # Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
 anger_simple_effects <- compute_bf_simple_effects(
