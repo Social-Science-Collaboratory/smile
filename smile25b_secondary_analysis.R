@@ -193,6 +193,8 @@ fear_bf_anova <- readRDS("data/secondary_analysis/smile25b_fear_bf_anova.Rds")
 # Extract Bayes Factor ANOVA estimates with the custom function 'extract_bf_anova'
 fear_bf_anova_table <- extract_bf_anova(fear_bf_anova)
 
+print(fear_bf_anova_table)
+
 # Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
 fear_simple_effects <- compute_bf_simple_effects(
   df_wide = df, 
@@ -248,6 +250,8 @@ anger_bf_anova <- readRDS("data/secondary_analysis/smile25b_anger_bf_anova.Rds")
 
 # Extract Bayes Factor ANOVA estimates with the custom function 'extract_bf_anova'
 anger_bf_anova_table <- extract_bf_anova(anger_bf_anova)
+
+print(anger_bf_anova_table)
 
 # Compute the Bayes Factor simple effects for the dumbbell plot figure with the custom function 'compute_bf_simple_effects'
 anger_simple_effects <- compute_bf_simple_effects(
