@@ -312,9 +312,9 @@ rm(task_prefixes, deq_happy_items, deq_anger_items, deq_fear_items,
    pfx, cols, composite_col)
 
 # Pull facial expression compliance data from OpenFace processing code
-openface_results <- read_csv("data/smile25b_openface_processed.csv") |>
-  select(Gorilla_ID, face_compliance_scalar, face_compliance_binary) %>%
+openface_results <- read_csv("data/smile25b_openface_processed.csv") %>%
   mutate(Gorilla_ID = as.numeric(Gorilla_ID))
+  
 
 # Join openface compliance data with main data frame
 df <- left_join(df, openface_results, by = "Gorilla_ID")
