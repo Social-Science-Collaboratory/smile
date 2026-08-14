@@ -1,13 +1,16 @@
 
 
 # Function: Prepare the per-participant smile - natural difference scores, used to
-# draw the violin distribution shape (positive = smiling increased the outcome)
+# draw the point estimate + error bar plot (positive = smiling increased the outcome)
 
-draw_violin_plot <- function(
-  df_wide, outcome_label, outcome,
+draw_plot <- function(
+  df_wide, 
+  outcome_label, 
+  outcome,
   legend_position = c("top_right", "bottom_right", "none"),
   x_axis = TRUE,
-  y_axis = TRUE
+  y_axis = TRUE,
+  y_text
 ) {
 
   legend_position <- match.arg(legend_position)
@@ -16,7 +19,12 @@ draw_violin_plot <- function(
   SP_outcome <- paste0("SP_", outcome)
   NP_outcome <- paste0("NP_", outcome)
 
-  violin_data <- df_wide %>%
+  # Set plot colors: blue = positive, reddish-orange = negative
+  color_positive <- "#0055c4"
+  color_negative <- "#e53b03c4"
+
+
+  plot_data <- df_wide %>%
     select(context, threat, repetition, all_of(SP_outcome), all_of(NP_outcome)) %>%
     drop_na(context, threat, repetition, all_of(SP_outcome), all_of(NP_outcome)) %>%
     mutate(diff = .data[[SP_outcome]] - .data[[NP_outcome]]) %>%
@@ -29,14 +37,7 @@ draw_violin_plot <- function(
         levels = c("Pose once", "Pose ten times")
       ),
       threat_label = factor(threat, levels = c("No threat", "Threat"))
-    )
-
-  # Set plot colors: blue = positive, reddish-orange = negative
-  color_positive <- "#0055c4"
-  color_negative <- "#e53b03c4"
-
-  # Prepare the pose difference score per condition for the point estimate + error bar plot component
-  point_data <- violin_data %>%
+    ) %>%
     # Group by the condition combinations
     group_by(context_label, repetition_label, threat_label) %>%
     # Calculate mean and standard error
@@ -48,9 +49,7 @@ draw_violin_plot <- function(
     mutate(
       # calculate error bar limits on the y-axis
       error_min = diff_mean - SE,
-      error_max = diff_mean + SE,
-      # Set the x-axis position adjustment to match the half-violin plot allocation by context
-      x_dodge = if_else(context_label == "Negative", 0.9, 1.1)
+      error_max = diff_mean + SE
     )
 
   # Prepare pose effect direction labels that indicate the direction of the pose effect 
@@ -58,29 +57,29 @@ draw_violin_plot <- function(
     # Set x-axis positioning
     x = 0.5,
     # Set y-axis positining
-    y = c(1.5, -1.5),
+    y = c(.5, -.5),
     # define label text
     label = c(
       paste0("smiling increases ", outcome_label),
       paste0("smiling decreases ", outcome_label)
     ),
     # Identify the facet where the label will appear ('Pose once', 'No threat')
-    repetition_label = levels(violin_data$repetition_label)[1],
-    threat_label = levels(violin_data$threat_label)[1]
+    repetition_label = levels(plot_data$repetition_label)[1],
+    threat_label = levels(plot_data$threat_label)[1]
   )
 
-  # Legend placement: dran legend at the top right, bottom right, or hide
+  # Legend placement: draw legend at the top right, bottom right, or hide
   legend_theme <- switch(
     legend_position,
     top_right = theme(
       legend.position = "inside",
-      legend.position.inside = c(1, 1),
+      legend.position.inside = c(.95, .95),
       legend.justification = c("right", "top"),
       legend.background = element_rect(colour = "black", fill = "white")
     ),
     bottom_right = theme(
       legend.position = "inside",
-      legend.position.inside = c(1, 0),
+      legend.position.inside = c(.95, .05),
       legend.justification = c("right", "bottom"),
       legend.background = element_rect(colour = "black", fill = "white")
     ),
@@ -97,14 +96,7 @@ draw_violin_plot <- function(
   } else {
     NULL
   }
-
-  # Optionally set the y-axis label
-  y_label <- if (y_axis) {
-    paste0("Change in ", str_to_sentence(outcome_label), " Reports")
-  } else {
-    NULL
-  }
-
+  
   # Optionally show facet strip labels and nesting line (acts as the x-axis grouping)
   nest_line_element <- if (x_axis) {
     element_line(colour = "black", linewidth = 1)
@@ -129,29 +121,16 @@ draw_violin_plot <- function(
   diff_plot <- ggplot() +
     # Plot the y = 0 intercept line
     geom_hline(yintercept = 0, linetype = "dashed", color = "grey60") +
-    # Half-violin with negative context in the left and positive context in the right, following the context_label factor order
-    see::geom_violinhalf(
-      data = violin_data,
-      aes(x = "", y = diff, fill = context_label),
-      # Flip every other factor
-      flip = 1, 
-      # Position the half-violins at 0
-      position = "identity", 
-      # Set transparency factor
-      alpha = 0.4, 
-      # Remove outline
-      color = NA
-    ) +
     # Draw the mean point estimates using the point_data information
     geom_point(
-      data = point_data,
-      aes(x = x_dodge, y = diff_mean, color = context_label),
-      size = 2, show.legend = FALSE
+      data = plot_data,
+      aes(x = "", y = diff_mean, color = context_label),
+      size = 2
     ) +
     # Draw the error bar using the point_data information
     geom_errorbar(
-      data = point_data,
-      aes(x = x_dodge, ymin = error_min, ymax = error_max, color = context_label),
+      data = plot_data,
+      aes(x = "", ymin = error_min, ymax = error_max, color = context_label),
       width = 0.075, linewidth = 0.7, show.legend = FALSE
     ) +
     # Optionally show direction labels, placed inside the panel to the left of the violins
@@ -172,22 +151,16 @@ draw_violin_plot <- function(
         ) 
       )
     ) +
-    # Set color for the violin and point estimate plots
-    scale_fill_manual(values = c(
-      "Positive" = color_positive,
-      "Negative" = color_negative
-    )) +
     scale_colour_manual(
-      values = c("Positive" = color_positive, "Negative" = color_negative),
-      guide = "none"
+      values = c("Positive" = color_positive, "Negative" = color_negative)
     ) +
     # Set the y-axis range
-    coord_cartesian(ylim = c(-3, 3)) +
+    coord_cartesian(ylim = c(-1, 1)) +
     # Remove x-axis and create legend box
     labs(
       x = NULL,
-      y = y_label,
-      fill = "Context"
+      y = y_text,
+      color = "Context"
     ) +
     # Define classic theme (no grid) and theme settings (background, text size, facet strip settings)
     theme_classic(base_size = 16) +
@@ -209,20 +182,6 @@ draw_violin_plot <- function(
 
 
 # Declare the functions used in the Bayesian analyses and in the plot generation
-
-# Function: classify BF10 strength of evidence per Lee & Wagenmakers (2013)
-bf_label <- function(bf) {
-  bf_ref <- ifelse(bf >= 1, bf, 1 / bf)
-  direction <- ifelse(bf >= 1, "alternative", "null")
-  strength <- case_when(
-    bf_ref < 3 ~ "anecdotal",
-    bf_ref < 10 ~ "moderate",
-    bf_ref < 30 ~ "strong",
-    bf_ref < 100 ~ "very strong",
-    TRUE ~ "extreme"
-  )
-  paste(strength, "evidence for", direction)
-}
 
 # Function: Compute the Bayes Factor ANOVA for a generic outcome variable
 compute_bf_anova <- function(df_long, outcome) {
@@ -278,7 +237,7 @@ extract_bf_anova <- function(outcome_bf_anova) {
     select(model_included, bf, error) %>%
     # Invert the bf value, which is computed using the reduced model (without the term of interest) as the alternative hypothesis
     mutate(BF10 = 1 / bf, error_pct = error) %>%
-    # RCreate a new column containing the term being tested in each reduced model
+    # Create a new column containing the term being tested in each reduced model
     rowwise() %>%
     mutate(
       included_terms = list(str_trim(str_split(model_included, "\\+")[[1]])),
@@ -287,8 +246,6 @@ extract_bf_anova <- function(outcome_bf_anova) {
     ungroup() %>%
     # Remove unused variables
     select(-included_terms, -model_included, -bf, -error)  %>%
-    # Assign labels reflecting the strength of the evidence of each BF value
-    mutate(evidence = bf_label(BF10)) %>%
     # Reorder rows and columns
     relocate(term_dropped, .before = 1) %>%
     arrange(desc(row_number()))
@@ -337,9 +294,7 @@ compute_bf_simple_effects <- function(df_wide, outcome) {
       })
     ) %>%
     # Extract the n, BF10, and error_pct columns nested in the result column
-    unnest(result) %>%
-    # Assign labels representing the strength of evidence for each Bayes Factor estimate
-    mutate(evidence = bf_label(BF10))
+    unnest(result)
   
   return(outcome_simple_effects)
 }
