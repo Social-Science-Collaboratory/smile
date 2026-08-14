@@ -5,6 +5,8 @@ library(tidyverse)
 library(lmerTest)
 library(emmeans)
 library(BayesFactor)
+library(ggh4x)
+library(see)
 
 # Source functions used in the Bayesian analyses and figure generation
 source("smile25b_functions.R")
@@ -70,6 +72,31 @@ happy_emm <- emmeans(happy_model, ~ pose | context + threat + repetition)
 
 summary(happy_emm)
 
+# Prepare the summary and violin plot data with the custom functions 'prepare_plot_data'
+# and 'prepare_violin_data'
+source("smile25b_functions.R")
+
+# Draw the happiness score half-violin plot with mean point estimates/standard error bars 
+# with the custom function 'draw_violin_plot'
+happy_violin_plot <- draw_violin_plot(
+  df_wide = df, 
+  outcome = "DEQ_happy_total",
+  outcome_label = "happiness",
+  legend_position = "top_right",
+  x_axis = TRUE,
+  y_axis = TRUE
+)
+
+print(happy_violin_plot)
+
+ggsave(
+  "figures/smile25b_happy_violin_plot.jpg",
+  plot = happy_violin_plot,
+  width = 12, height = 8, dpi = 300
+  )
+
+# Bayesian Analysis of happiness score outcomes
+
 happy_start_time <- Sys.time()
 
 # Compute Bayes Factor anova for the DEQ Happiness scores with the custom function 'compute_bf_anova'
@@ -101,27 +128,7 @@ happy_simple_effects <- compute_bf_simple_effects(
 
 print(happy_simple_effects)
 
-# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
-happy_plot_data <- prepare_plot_data(
-  outcome_emm = happy_emm,
-  outcome_simple_effects = happy_simple_effects
-)
-
-# Draw the dumbbell plot using the happiness score plot data with the custom function 'draw_dumbbell_plot'
-happy_dumbbell_plot <- draw_dumbbell_plot(
-  plot_data = happy_plot_data, 
-  outcome_label = "Happiness",
-  color_natural = "#316ac6",
-  color_smile = "#f5ad06"
-)
-  
-ggsave(
-  "figures/smile25b_happy_dumbbell_plot.png",
-  plot = happy_dumbbell_plot,
-  width = 15, height = 8, dpi = 300
-  )
-
-# Sensitivity analysis: Outcome = happiness, dataset = compliant responses only
+# Sensitivity analysis: Outcome = happiness, dataset = compliant responses only (Hard sensitivity check)
 
 # Compliance check based on AU12 activation difference (delta = 1.5 out of 5) in smile vs natual condition via OpenFace
 table(df$face_compliance_scalar)
@@ -186,6 +193,23 @@ happy_sens_emm <- emmeans(happy_sens_model, ~ pose | context + threat + repetiti
 
 summary(happy_sens_emm)
 
+# Draw the hard sensitivity analysis half-violin plot
+happy_sens_violin_plot <- draw_violin_plot(
+  df_wide = df_sens_wide, 
+  outcome = "DEQ_happy_total",
+  outcome_label = "happiness",
+  legend_position = "top_right"
+)
+
+# Save plot to figures folder
+ggsave(
+  "figures/smile25b_happy_sens_violin_plot.png",
+  plot = happy_sens_violin_plot,
+  width = 15, height = 8, dpi = 300
+)
+
+# Hard sensitivity check Bayesian analysis
+
 happy_sens_start_time <- Sys.time()
 
 # Compute Bayes Factor anova for the DEQ Happiness scores with the custom function 'compute_bf_anova'
@@ -212,28 +236,7 @@ happy_sens_simple_effects <- compute_bf_simple_effects(df_sens_wide, "DEQ_happy_
 
 print(happy_sens_simple_effects)
 
-# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
-happy_sens_plot_data <- prepare_plot_data(
-  outcome_emm = happy_sens_emm,
-  outcome_simple_effects = happy_sens_simple_effects
-)
-
-# Draw the dumbbell plot with the custom function 'draw_dumbell_plot'
-happy_sens_dumbbell_plot <- draw_dumbbell_plot(
-  plot_data = happy_sens_plot_data, 
-  outcome_label = "Sensitivity analysis: Happiness",
-  color_natural = "#316ac6",
-  color_smile = "#f5ad06"
-)
-
-# Save plot to figures folder
-ggsave(
-  "figures/smile25b_happy_sens_dumbbell_plot.png",
-  plot = happy_sens_dumbbell_plot,
-  width = 15, height = 8, dpi = 300
-  )
-
-## Sensitivity analysis with less stringent scalar coding
+## Sensitivity analysis with less stringent scalar coding (Soft sensitivity check)
 
 # Prepare data for sensitivity analysis
 df_sens_soft_wide <- df %>%
@@ -290,6 +293,23 @@ happy_sens_soft_emm <- emmeans(happy_sens_soft_model, ~ pose | context + threat 
 
 summary(happy_sens_soft_emm)
 
+# Draw the soft sensitivity check half-violin plot
+happy_sens_soft_violin_plot <- draw_violin_plot(
+  df_wide = df_sens_soft_wide, 
+  outcome = "DEQ_happy_total",
+  outcome_label = "happiness",
+  legend_position = "top_right"
+)
+
+# Save plot to figures folder
+ggsave(
+  "figures/smile25b_happy_sens_soft_violin_plot.png",
+  plot = happy_sens_soft_violin_plot,
+  width = 15, height = 8, dpi = 300
+)
+
+# Soft sensitivity check Bayesian analysis
+
 print(happy_sens_soft_start_time <- Sys.time())
 
 # Compute Bayes Factor anova for the DEQ Happiness scores with the custom function 'compute_bf_anova'
@@ -315,24 +335,3 @@ happy_sens_soft_bf_anova_table %>%
 happy_sens_soft_simple_effects <- compute_bf_simple_effects(df_sens_soft_wide, "DEQ_happy_total")
 
 print(happy_sens_soft_simple_effects)
-
-# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
-happy_sens_soft_plot_data <- prepare_plot_data(
-  outcome_emm = happy_sens_soft_emm,
-  outcome_simple_effects = happy_sens_soft_simple_effects
-)
-
-# Draw the dumbbell plot with the custom function 'draw_dumbell_plot'
-happy_sens_soft_dumbbell_plot <- draw_dumbbell_plot(
-  plot_data = happy_sens_soft_plot_data, 
-  outcome_label = "Sensitivity analysis: Happiness",
-  color_natural = "#316ac6",
-  color_smile = "#f5ad06"
-)
-
-# Save plot to figures folder
-ggsave(
-  "figures/smile25b_happy_sens_soft_dumbbell_plot.png",
-  plot = happy_sens_soft_dumbbell_plot,
-  width = 15, height = 8, dpi = 300
-  )

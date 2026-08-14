@@ -1,5 +1,214 @@
 
-# Declare the functions used in the Bayesian analyses and in the dumbbell plot generation
+
+# Function: Prepare the per-participant smile - natural difference scores, used to
+# draw the violin distribution shape (positive = smiling increased the outcome)
+
+draw_violin_plot <- function(
+  df_wide, outcome_label, outcome,
+  legend_position = c("top_right", "bottom_right", "none"),
+  x_axis = TRUE,
+  y_axis = TRUE
+) {
+
+  legend_position <- match.arg(legend_position)
+
+  # Set Smile pose and Natural pose outcome variable names
+  SP_outcome <- paste0("SP_", outcome)
+  NP_outcome <- paste0("NP_", outcome)
+
+  violin_data <- df_wide %>%
+    select(context, threat, repetition, all_of(SP_outcome), all_of(NP_outcome)) %>%
+    drop_na(context, threat, repetition, all_of(SP_outcome), all_of(NP_outcome)) %>%
+    mutate(diff = .data[[SP_outcome]] - .data[[NP_outcome]]) %>%
+    mutate(
+      # x-axis grouping: Context (ordered, drives color)
+      context_label = factor(str_to_title(context), levels = c("Negative", "Positive")),
+      # facet-column keys: Repetition x Threat (ordered)
+      repetition_label = factor(
+        if_else(repetition == "one", "Pose once", "Pose ten times"),
+        levels = c("Pose once", "Pose ten times")
+      ),
+      threat_label = factor(threat, levels = c("No threat", "Threat"))
+    )
+
+  # Set plot colors: blue = positive, reddish-orange = negative
+  color_positive <- "#0055c4"
+  color_negative <- "#e53b03c4"
+
+  # Prepare the pose difference score per condition for the point estimate + error bar plot component
+  point_data <- violin_data %>%
+    # Group by the condition combinations
+    group_by(context_label, repetition_label, threat_label) %>%
+    # Calculate mean and standard error
+    summarise(
+      diff_mean = mean(diff),
+      SE = sd(diff) / sqrt(n()),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      # calculate error bar limits on the y-axis
+      error_min = diff_mean - SE,
+      error_max = diff_mean + SE,
+      # Set the x-axis position adjustment to match the half-violin plot allocation by context
+      x_dodge = if_else(context_label == "Negative", 0.9, 1.1)
+    )
+
+  # Prepare pose effect direction labels that indicate the direction of the pose effect 
+  direction_label_data <- data.frame(
+    # Set x-axis positioning
+    x = 0.5,
+    # Set y-axis positining
+    y = c(1.5, -1.5),
+    # define label text
+    label = c(
+      paste0("smiling increases ", outcome_label),
+      paste0("smiling decreases ", outcome_label)
+    ),
+    # Identify the facet where the label will appear ('Pose once', 'No threat')
+    repetition_label = levels(violin_data$repetition_label)[1],
+    threat_label = levels(violin_data$threat_label)[1]
+  )
+
+  # Legend placement: dran legend at the top right, bottom right, or hide
+  legend_theme <- switch(
+    legend_position,
+    top_right = theme(
+      legend.position = "inside",
+      legend.position.inside = c(1, 1),
+      legend.justification = c("right", "top"),
+      legend.background = element_rect(colour = "black", fill = "white")
+    ),
+    bottom_right = theme(
+      legend.position = "inside",
+      legend.position.inside = c(1, 0),
+      legend.justification = c("right", "bottom"),
+      legend.background = element_rect(colour = "black", fill = "white")
+    ),
+    none = theme(legend.position = "none")
+  )
+
+  # Optionally show direction labels, placed inside the panel to the left of the violins
+  direction_labels <- if (y_axis) {
+    geom_text(
+      data = direction_label_data,
+      aes(x = x, y = y, label = label),
+      inherit.aes = FALSE, angle = 90, size = 5, color = "grey30"
+    )
+  } else {
+    NULL
+  }
+
+  # Optionally set the y-axis label
+  y_label <- if (y_axis) {
+    paste0("Change in ", str_to_sentence(outcome_label), " Reports")
+  } else {
+    NULL
+  }
+
+  # Optionally show facet strip labels and nesting line (acts as the x-axis grouping)
+  nest_line_element <- if (x_axis) {
+    element_line(colour = "black", linewidth = 1)
+  } else {
+    element_blank()
+  }
+
+  strip_theme <- if (x_axis) {
+    theme(
+      strip.placement = "outside",
+      strip.text.x = element_text(size = 15),
+      ggh4x.facet.nestline = nest_line_element
+    )
+  } else {
+    theme(
+      strip.text.x = element_blank(),
+      ggh4x.facet.nestline = nest_line_element
+    )
+  }
+
+  # Begin plotting
+  diff_plot <- ggplot() +
+    # Plot the y = 0 intercept line
+    geom_hline(yintercept = 0, linetype = "dashed", color = "grey60") +
+    # Half-violin with negative context in the left and positive context in the right, following the context_label factor order
+    see::geom_violinhalf(
+      data = violin_data,
+      aes(x = "", y = diff, fill = context_label),
+      # Flip every other factor
+      flip = 1, 
+      # Position the half-violins at 0
+      position = "identity", 
+      # Set transparency factor
+      alpha = 0.4, 
+      # Remove outline
+      color = NA
+    ) +
+    # Draw the mean point estimates using the point_data information
+    geom_point(
+      data = point_data,
+      aes(x = x_dodge, y = diff_mean, color = context_label),
+      size = 2, show.legend = FALSE
+    ) +
+    # Draw the error bar using the point_data information
+    geom_errorbar(
+      data = point_data,
+      aes(x = x_dodge, ymin = error_min, ymax = error_max, color = context_label),
+      width = 0.075, linewidth = 0.7, show.legend = FALSE
+    ) +
+    # Optionally show direction labels, placed inside the panel to the left of the violins
+    direction_labels +
+    # Create nested facet labels using the ggh4x package
+    ggh4x::facet_nested(
+      # Nest the threat factor within the repetition factor 
+      . ~ repetition_label + threat_label,
+      # Position facet labels on the bottom
+      switch = "x",
+      # Create a line above the facet labels indicating nestedness
+      nest_line = nest_line_element,
+      # Remove the frame and background of the facet strips
+      strip = ggh4x::strip_nested(
+        background_x = list(
+          element_rect(linewidth = 0, fill = "white"),
+          element_blank()
+        ) 
+      )
+    ) +
+    # Set color for the violin and point estimate plots
+    scale_fill_manual(values = c(
+      "Positive" = color_positive,
+      "Negative" = color_negative
+    )) +
+    scale_colour_manual(
+      values = c("Positive" = color_positive, "Negative" = color_negative),
+      guide = "none"
+    ) +
+    # Set the y-axis range
+    coord_cartesian(ylim = c(-3, 3)) +
+    # Remove x-axis and create legend box
+    labs(
+      x = NULL,
+      y = y_label,
+      fill = "Context"
+    ) +
+    # Define classic theme (no grid) and theme settings (background, text size, facet strip settings)
+    theme_classic(base_size = 16) +
+    theme(
+      panel.background = element_rect(fill = "white", colour = "white"),
+      plot.background  = element_rect(fill = "white", colour = "white"),
+      plot.margin      = margin(t = 25, r = 25, b = 15, l = 15),
+      axis.text.x      = element_blank(),
+      axis.ticks.x     = element_blank(),
+      legend.key.width = unit(4, "lines"),
+      legend.key.height = unit(1.5, "lines")
+    ) +
+    # Optionally show facet strip labels and nesting line (acts as the x-axis)
+    strip_theme +
+    legend_theme
+
+  diff_plot
+}
+
+
+# Declare the functions used in the Bayesian analyses and in the plot generation
 
 # Function: classify BF10 strength of evidence per Lee & Wagenmakers (2013)
 bf_label <- function(bf) {
@@ -39,7 +248,8 @@ compute_bf_anova <- function(df_long, outcome) {
     paste0(outcome, " ~ pose * context * threat * repetition + id")
   )
 
-  # Compute the full anovaBF model of outcome score by pose, context, threat, and repetition
+  # Compute the full anovaBF model of outcome score by pose, context, threat, and
+  # repetition
   outcome_bf_anova <- anovaBF(
     bf_formula,
     data = df_bf,
@@ -132,125 +342,4 @@ compute_bf_simple_effects <- function(df_wide, outcome) {
     mutate(evidence = bf_label(BF10))
   
   return(outcome_simple_effects)
-}
-
-# Function: Prepare plot data for the dumbbell plot with frequentist and bayesian simple effects
-
-prepare_plot_data <- function(outcome_emm, outcome_simple_effects) {
-
-  ## Extract point estimates of smile and natural pose happiness scores across conditions
-  plot_data <- as.data.frame(outcome_emm) %>%
-    select(context, threat, repetition, pose, emmean) %>%
-    pivot_wider(names_from = pose, values_from = emmean, names_glue = "{pose}_mean")
-
-  ## Extract pairwise comparison estimates and p values
-  outcome_contrasts <- pairs(outcome_emm, reverse = TRUE) %>%
-    as.data.frame() %>%
-    select(context, threat, repetition, estimate, p.value)
-
-  ## Join the point and pairwise estimates
-  plot_data <- plot_data %>%
-    left_join(outcome_contrasts, by = c("context", "threat", "repetition")) %>%
-    # Adjust labels
-    rename(diff_mean = estimate) %>%
-    mutate(
-      context_label = str_to_title(context),
-      threat_label = threat,
-      repetition_label = if_else(repetition == "one", "One time", "Ten times"),
-      condition = paste(context_label,  repetition_label, threat_label, sep = " | "),
-      condition = factor(condition, levels = rev(sort(unique(condition)))),
-      sig_label = case_when(
-      p.value < .05 & diff_mean > 0 ~ "Smile > Natural (p < .05)",
-      p.value < .05 & diff_mean < 0 ~ "Natural > Smile (p < .05)",
-      TRUE ~ "No significant difference"
-      )
-    )
-
-  # Join frequentist and Bayesian analyses results and build the BF10 label for each condition
-  plot_data <- plot_data %>%
-    left_join(
-      outcome_simple_effects %>% select(context, threat, repetition, BF10, evidence),
-      by = c("context", "threat", "repetition")
-      ) %>%
-    mutate(
-      # Crop BF10 values over 100 or under .01 and round digits to 2 decimal cases 
-      bf_display = case_when(
-        BF10 > 100  ~ "> 100",
-        BF10 < 0.01 ~ "< 0.01",
-        TRUE      ~ formatC(BF10, format = "f", digits = 2)),
-      # Create label using the BF10 value and the evidence strength categories
-      bf_label_text = paste0(
-        "BF10 ", ifelse(bf_display %in% c("> 100", "< 0.01"), bf_display, paste0("= ", bf_display)),
-        "\n", evidence),
-      # place each label to the side of the right-most point estimate
-      label_x = pmax(smile_mean, natural_mean, na.rm = TRUE) +
-      0.05 * diff(range(c(smile_mean, natural_mean), na.rm = TRUE))
-      )
-
-  return(plot_data)
-}
-
-# Function: Use plot data to generate the dumbbell plot
-draw_dumbbell_plot <- function(plot_data, outcome_label, color_natural, color_smile) {
-  
-  # Extract point estimates for plot generation
-    plot_points <- plot_data %>%
-      select(condition, smile_mean, natural_mean) %>%
-      pivot_longer(c(smile_mean, natural_mean), names_to = "pose", values_to = "mean_outcome") %>%  # long format for geom_point
-      mutate(pose = recode(pose, smile_mean = "Smile", natural_mean = "Natural"))  # readable pose labels
-
-  # Create a dumbbell plot comparing the smile vs pose happiness scores across all conditions
-  dumbbell_plot <- ggplot() +
-  # Draw the line that connects the natural and smile means for each condition
-    geom_segment(
-      data = plot_data,
-      aes(x = natural_mean, xend = smile_mean, y = condition, yend = condition, color = sig_label),
-      linewidth = 1.5
-    ) +
-    # Draw the point estimates of outcome mean scores per condition
-    geom_point(
-      data = plot_points,
-      aes(x = mean_outcome, y = condition, shape = pose, fill = pose),
-      size = 4.5, stroke = 0
-      ) +
-    # Bayes Factor label for each condition, placed to the side of the right-most point estimate
-    geom_text(
-      data = plot_data,
-      aes(x = label_x, y = condition, label = bf_label_text),
-      hjust = 0, size = 4.5, lineheight = 0.9, color = "grey30"
-      ) +
-    # determine line color based on the direction/significance of the outcome score difference
-    scale_color_manual(values = c(
-      "Smile > Natural (p < .05)" = color_smile,
-      "Natural > Smile (p < .05)" = color_natural,
-      "No significant difference" = "grey70"
-      )) +
-    # fill the points matching the pose color
-      scale_fill_manual(values = c(
-      "Natural" = color_natural,
-      "Smile" = color_smile
-      )) +
-    # Set the shape of the points based on pose
-    scale_shape_manual(values = c(
-      "Natural" = 21,
-      "Smile" = 23
-      )) +
-    # Configure axis and legend labels
-    labs(
-      x = outcome_label,
-      y = "Context | Repetition | Threat",
-      color = "Smile vs. Natural contrast",
-      shape = "Pose",
-      fill = "Pose",
-      title = paste0(outcome_label, " by Posed Expression across Conditions")
-      ) +
-    # Fix the x-axis range to leave enough room for the BF labels
-    scale_x_continuous(expand = expansion(add = c(0.5, 2.5))) +
-    # Set theme and font size
-    theme_minimal(base_size = 16) +
-    theme(
-      panel.background = element_rect(fill = "white", colour = "white"),
-      plot.background = element_rect(fill = "white", colour = "white"),
-      plot.margin = margin(t = 5, r = 15, b = 5, l = 5)
-      )
 }

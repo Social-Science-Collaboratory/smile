@@ -3,6 +3,9 @@ library(tidyverse)
 library(lmerTest)
 library(emmeans)
 library(BayesFactor)
+library(ggh4x)
+library(see) #see:geom_violinhalf()
+library(cowplot)
 
 # Source functions used in the Bayesian analyses and figure generation
 source("smile25b_functions.R")
@@ -56,6 +59,20 @@ SWL_emm <- emmeans(SWL_model, ~ pose | context + threat + repetition)
 
 summary(SWL_emm)
 
+# Draw the SWL half-violin plot with the custom function 'draw_violin_plot'
+SWL_violin_plot <- draw_violin_plot(
+  df_wide = df, 
+  outcome = "SWL_total",
+  outcome_label = "satisfaction with life",
+  legend_position = "none",
+  x_axis = FALSE,
+  y_axis = FALSE
+)
+
+print(SWL_violin_plot)
+
+# SWL Bayesian analysis
+
 print(SWL_start_time <- Sys.time())
 
 # Compute Bayes Factor anova for the SWL scores using the custom function 'compute_bf_anova'
@@ -82,28 +99,6 @@ SWL_simple_effects <- compute_bf_simple_effects(df, "SWL_total")
 
 print(SWL_simple_effects)
 
-# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
-SWL_plot_data <- prepare_plot_data(
-  outcome_emm = SWL_emm,
-  outcome_simple_effects = SWL_simple_effects
-)
-
-# Draw the dumbbell plot with the custom function 'draw_dumbell_plot'
-SWL_dumbbell_plot <- draw_dumbbell_plot(
-  plot_data = SWL_plot_data, 
-  outcome_label = "Satisfaction with Life",
-  color_natural = "#316ac6",
-  color_smile = "#009900"
-)
-
-# Save plot to figures folder
-ggsave(
-  "figures/smile25b_SWL_dumbbell_plot.png",
-  plot = SWL_dumbbell_plot,
-  width = 15, height = 8, dpi = 300
-  )
-
-
 # Burnout predicted by pose, context, threat, and repetition
 Burnout_model <- lmer(
   Burnout_total ~ pose * context * threat * repetition + (1 | id),
@@ -116,6 +111,20 @@ print(summary(Burnout_model))
 Burnout_emm <- emmeans(Burnout_model, ~ pose | context + threat + repetition)
 
 summary(Burnout_emm)
+
+# Draw the Burnout half-violin plot with the custom function 'draw_violin_plot'
+Burnout_violin_plot <- draw_violin_plot(
+  df_wide = df, 
+  outcome = "Burnout_total",
+  outcome_label = "burnout",
+  legend_position = "top_right",
+  x_axis = FALSE,
+  y_axis = FALSE
+)
+
+print(Burnout_violin_plot)
+
+# Burnout Bayesian analysis
 
 print(Burnout_start_time <- Sys.time())
 
@@ -143,27 +152,6 @@ Burnout_simple_effects <- compute_bf_simple_effects(df, "Burnout_total")
 
 print(Burnout_simple_effects)
 
-# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
-Burnout_plot_data <- prepare_plot_data(
-  outcome_emm = Burnout_emm,
-  outcome_simple_effects = Burnout_simple_effects
-)
-
-# Draw the dumbbell plot with the custom function 'draw_dumbell_plot'
-Burnout_dumbbell_plot <- draw_dumbbell_plot(
-  plot_data = Burnout_plot_data, 
-  outcome_label = "Burnout",
-  color_natural = "#316ac6",
-  color_smile = "#AA00FF"
-)
-
-# Save plot to figures folder
-ggsave(
-  "figures/smile25b_Burnout_dumbbell_plot.png",
-  plot = Burnout_dumbbell_plot,
-  width = 15, height = 8, dpi = 300
-  )
-
 # Exploratory analysis: Outcome = fear, dataset = full
 
 # Full factorial general linear mixed model of fear predicted by pose, context, threat, and repetition
@@ -178,6 +166,20 @@ print(summary(fear_model))
 fear_emm <- emmeans(fear_model, ~ pose | context + threat + repetition)
 
 summary(fear_emm)
+
+# Draw the Fear half-violin plot with the custom function 'draw_violin_plot'
+fear_violin_plot <- draw_violin_plot(
+  df_wide = df, 
+  outcome = "DEQ_fear_total",
+  outcome_label = "fear",
+  legend_position = "none",
+  x_axis = TRUE,
+  y_axis = FALSE
+)
+
+print(fear_violin_plot)
+
+# Fear Bayesian analysis
 
 print(fear_start_time <- Sys.time())
 
@@ -202,26 +204,6 @@ fear_simple_effects <- compute_bf_simple_effects(
 
 print(fear_simple_effects)
 
-# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
-fear_plot_data <- prepare_plot_data(
-  outcome_emm = fear_emm,
-  outcome_simple_effects = fear_simple_effects
-)
-
-# Draw the dumbbell plot using the happiness score plot data with the custom function 'draw_dumbbell_plot'
-fear_dumbbell_plot <- draw_dumbbell_plot(
-  plot_data = fear_plot_data, 
-  outcome_label = "Fear",
-  color_natural = "#316ac6",
-  color_smile = "#FFA500"
-)
-  
-ggsave(
-  "figures/smile25b_fear_dumbbell_plot.png",
-  plot = fear_dumbbell_plot,
-  width = 15, height = 8, dpi = 300
-  )
-
 # Exploratory analysis: Outcome = anger, dataset = full
 
 # Full factorial general linear mixed model of anger predicted by pose, context, threat, and repetition
@@ -236,6 +218,20 @@ print(summary(anger_model))
 anger_emm <- emmeans(anger_model, ~ pose | context + threat + repetition)
 
 summary(anger_emm)
+
+# Draw the Anger half-violin plot with the custom function 'draw_violin_plot'
+anger_violin_plot <- draw_violin_plot(
+  df_wide = df, 
+  outcome = "DEQ_anger_total",
+  outcome_label = "anger",
+  legend_position = "none",
+  x_axis = TRUE,
+  y_axis = FALSE
+)
+
+print(anger_violin_plot)
+
+# Anger Bayesian analysis
 
 print(anger_start_time <- Sys.time())
 
@@ -260,22 +256,18 @@ anger_simple_effects <- compute_bf_simple_effects(
 
 print(anger_simple_effects)
 
-# Prepare the dataframe for the dumbbell plot with the custom function 'prepare_plot_data'
-anger_plot_data <- prepare_plot_data(
-  outcome_emm = anger_emm,
-  outcome_simple_effects = anger_simple_effects
+
+combined_plot <- plot_grid(
+  SWL_violin_plot, Burnout_violin_plot,
+  fear_violin_plot, anger_violin_plot,
+  labels = c('a)', 'b)', 'c)', 'd)'),
+  ncol = 2
 )
 
-# Draw the dumbbell plot using the happiness score plot data with the custom function 'draw_dumbbell_plot'
-anger_dumbbell_plot <- draw_dumbbell_plot(
-  plot_data = anger_plot_data, 
-  outcome_label = "Anger",
-  color_natural = "#316ac6",
-  color_smile = "#FF0000"
-)
-  
+print(combined_plot)
+
 ggsave(
-  "figures/smile25b_anger_dumbbell_plot.png",
-  plot = anger_dumbbell_plot,
-  width = 15, height = 8, dpi = 300
+  "figures/smile25b_combined_secondary_plot.jpg",
+  plot = combined_plot,
+  width = 14, height = 10, dpi = 300
   )
