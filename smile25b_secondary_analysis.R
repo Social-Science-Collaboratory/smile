@@ -93,7 +93,8 @@ SWL_plot <- draw_plot(
   legend_position = "none",
   x_axis = FALSE,
   y_axis = FALSE,
-  y_text = "Changes in Satisfaction with Life Report"
+  y_text = "Δ Satisfaction with Life Reports",
+  y_breaks = c(-.15, 0, .15)
 )
 
 print(SWL_plot)
@@ -182,7 +183,8 @@ Burnout_plot <- draw_plot(
   legend_position = "top_right",
   x_axis = FALSE,
   y_axis = FALSE,
-  y_text = "Changes in Burnout Report"
+  y_text = "Δ Burnout Reports",
+  y_breaks = c(-.15, 0, .15)
 )
 
 print(Burnout_plot)
@@ -273,7 +275,8 @@ fear_plot <- draw_plot(
   legend_position = "none",
   x_axis = TRUE,
   y_axis = FALSE,
-  y_text = "Changes in Fear Report"
+  y_text = "Δ Fear Reports",
+  y_breaks = c(-.3, 0, .3)
 )
 
 print(fear_plot)
@@ -361,7 +364,8 @@ anger_plot <- draw_plot(
   legend_position = "none",
   x_axis = TRUE,
   y_axis = FALSE,
-  y_text = "Changes in Anger Report"
+  y_text = "Δ Anger Reports",
+  y_breaks = c(-.2, .4, 1)
 )
 
 print(anger_plot)

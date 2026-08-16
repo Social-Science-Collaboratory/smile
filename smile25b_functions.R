@@ -10,10 +10,14 @@ draw_plot <- function(
   legend_position = c("top_right", "bottom_right", "none"),
   x_axis = TRUE,
   y_axis = TRUE,
-  y_text
+  y_text,
+  y_breaks
 ) {
 
   legend_position <- match.arg(legend_position)
+
+  # Set the y-axis range from the outermost hard-coded breaks
+  y_limits <- range(y_breaks)
 
   # Set Smile pose and Natural pose outcome variable names
   SP_outcome <- paste0("SP_", outcome)
@@ -22,6 +26,13 @@ draw_plot <- function(
   # Set plot colors: blue = positive, reddish-orange = negative
   color_positive <- "#0055c4"
   color_negative <- "#e53b03c4"
+
+  # Set the colour used for the annotations, kept lighter than the axis text so
+  # it reads as secondary
+  color_annotation <- "grey60"
+
+  # Offset the Context levels to the left and right so they do not overlap
+  context_dodge <- position_dodge(width = 0.6)
 
 
   plot_data <- df_wide %>%
@@ -33,10 +44,13 @@ draw_plot <- function(
       context_label = factor(str_to_title(context), levels = c("Negative", "Positive")),
       # facet-column keys: Repetition x Threat (ordered)
       repetition_label = factor(
-        if_else(repetition == "one", "Pose once", "Pose ten times"),
-        levels = c("Pose once", "Pose ten times")
+        if_else(repetition == "one", "Pose Once", "Pose Ten Times"),
+        levels = c("Pose Once", "Pose Ten Times")
       ),
-      threat_label = factor(threat, levels = c("No threat", "Threat"))
+      threat_label = factor(
+        str_to_title(threat),
+        levels = c("No Threat", "Threat")
+      )
     ) %>%
     # Group by the condition combinations
     group_by(context_label, repetition_label, threat_label) %>%
@@ -56,13 +70,10 @@ draw_plot <- function(
   direction_label_data <- data.frame(
     # Set x-axis positioning
     x = 0.5,
-    # Set y-axis positining
-    y = c(.5, -.5),
+    # Set y-axis positining, kept equidistant from zero so the labels line up
+    y = c(diff(y_limits) / 6, -diff(y_limits) / 6),
     # define label text
-    label = c(
-      paste0("smiling increases ", outcome_label),
-      paste0("smiling decreases ", outcome_label)
-    ),
+    label = c("smiling increases", "smiling decreases"),
     # Identify the facet where the label will appear ('Pose once', 'No threat')
     repetition_label = levels(plot_data$repetition_label)[1],
     threat_label = levels(plot_data$threat_label)[1]
@@ -73,15 +84,15 @@ draw_plot <- function(
     legend_position,
     top_right = theme(
       legend.position = "inside",
-      legend.position.inside = c(.95, .95),
+      legend.position.inside = c(.95, .98),
       legend.justification = c("right", "top"),
-      legend.background = element_rect(colour = "black", fill = "white")
+      legend.background = element_blank()
     ),
     bottom_right = theme(
       legend.position = "inside",
       legend.position.inside = c(.95, .05),
       legend.justification = c("right", "bottom"),
-      legend.background = element_rect(colour = "black", fill = "white")
+      legend.background = element_blank()
     ),
     none = theme(legend.position = "none")
   )
@@ -91,7 +102,7 @@ draw_plot <- function(
     geom_text(
       data = direction_label_data,
       aes(x = x, y = y, label = label),
-      inherit.aes = FALSE, angle = 90, size = 5, color = "grey30"
+      inherit.aes = FALSE, angle = 90, size = 5.5, color = color_annotation
     )
   } else {
     NULL
@@ -125,13 +136,13 @@ draw_plot <- function(
     geom_point(
       data = plot_data,
       aes(x = "", y = diff_mean, color = context_label),
-      size = 2
+      size = 3.75, position = context_dodge
     ) +
     # Draw the error bar using the point_data information
     geom_errorbar(
       data = plot_data,
       aes(x = "", ymin = error_min, ymax = error_max, color = context_label),
-      width = 0.075, linewidth = 0.7, show.legend = FALSE
+      width = 0.1, linewidth = 1.3, show.legend = FALSE, position = context_dodge
     ) +
     # Optionally show direction labels, placed inside the panel to the left of the violins
     direction_labels +
@@ -152,15 +163,18 @@ draw_plot <- function(
       )
     ) +
     scale_colour_manual(
-      values = c("Positive" = color_positive, "Negative" = color_negative)
+      values = c("Positive" = color_positive, "Negative" = color_negative),
+      labels = c("Positive" = "Positive Context", "Negative" = "Negative Context")
     ) +
+    # Set the hard-coded y-axis breaks
+    scale_y_continuous(breaks = y_breaks) +
     # Set the y-axis range
-    coord_cartesian(ylim = c(-1, 1)) +
-    # Remove x-axis and create legend box
+    coord_cartesian(ylim = y_limits) +
+    # Remove x-axis and legend title
     labs(
       x = NULL,
       y = y_text,
-      color = "Context"
+      color = NULL
     ) +
     # Define classic theme (no grid) and theme settings (background, text size, facet strip settings)
     theme_classic(base_size = 16) +
@@ -171,7 +185,8 @@ draw_plot <- function(
       axis.text.x      = element_blank(),
       axis.ticks.x     = element_blank(),
       legend.key.width = unit(4, "lines"),
-      legend.key.height = unit(1.5, "lines")
+      legend.key.height = unit(1.5, "lines"),
+      legend.text = element_text(size = 14)
     ) +
     # Optionally show facet strip labels and nesting line (acts as the x-axis)
     strip_theme +

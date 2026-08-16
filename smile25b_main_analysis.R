@@ -124,7 +124,8 @@ happy_plot <- draw_plot(
   legend_position = "top_right",
   x_axis = TRUE,
   y_axis = TRUE,
-  y_text = "Changes in Happiness Report"
+  y_text = "Δ Happiness Reports",
+  y_breaks = c(-1, -.5, 0, .5)
 )
 
 print(happy_plot)
@@ -280,7 +281,8 @@ happy_sens_plot <- draw_plot(
   legend_position = "top_right",
   x_axis = TRUE,
   y_axis = TRUE,
-  y_text = "Changes in Happiness Report (Hard Sensitivity Check)"
+  y_text = "Δ Happiness Reports (Hard Sensitivity Check)",
+  y_breaks = c(-1.5, -1, -.5, 0, .5)
 )
 
 print(happy_sens_plot)
@@ -423,7 +425,8 @@ happy_sens_soft_plot <- draw_plot(
   legend_position = "top_right",
   x_axis = TRUE,
   y_axis = TRUE,
-  y_text = "Changes in Happiness Report (Soft Sensitivity Check)"
+  y_text = "Δ Happiness Reports (Soft Sensitivity Check)",
+  y_breaks = c(-1.5, -1, -.5, 0, .5)
 )
 
 print(happy_sens_soft_plot)
