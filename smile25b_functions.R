@@ -61,9 +61,9 @@ draw_plot <- function(
       .groups = "drop"
     ) %>%
     mutate(
-      # calculate error bar limits on the y-axis
-      error_min = diff_mean - SE,
-      error_max = diff_mean + SE
+      # calculate error bar limits on the y-axis (95% confidence interval)
+      error_min = diff_mean - 1.96 * SE,
+      error_max = diff_mean + 1.96 * SE
     )
 
   # Prepare pose effect direction labels that indicate the direction of the pose effect 

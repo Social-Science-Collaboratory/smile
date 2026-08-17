@@ -125,7 +125,7 @@ happy_plot <- draw_plot(
   x_axis = TRUE,
   y_axis = TRUE,
   y_text = "Δ Happiness Reports",
-  y_breaks = c(-1, -.5, 0, .5)
+  y_breaks = c(-1.5, -1, -.5, 0, .5)
 )
 
 print(happy_plot)
@@ -282,7 +282,7 @@ happy_sens_plot <- draw_plot(
   x_axis = TRUE,
   y_axis = TRUE,
   y_text = "Δ Happiness Reports (Hard Sensitivity Check)",
-  y_breaks = c(-1.5, -1, -.5, 0, .5)
+  y_breaks = c(-1.5, -1, -.5, 0, .5, 1)
 )
 
 print(happy_sens_plot)

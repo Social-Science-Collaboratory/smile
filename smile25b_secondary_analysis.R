@@ -94,7 +94,7 @@ SWL_plot <- draw_plot(
   x_axis = FALSE,
   y_axis = FALSE,
   y_text = "Δ Satisfaction with Life Reports",
-  y_breaks = c(-.15, 0, .15)
+  y_breaks = c(-.2, 0, .2)
 )
 
 print(SWL_plot)
@@ -184,7 +184,7 @@ Burnout_plot <- draw_plot(
   x_axis = FALSE,
   y_axis = FALSE,
   y_text = "Δ Burnout Reports",
-  y_breaks = c(-.15, 0, .15)
+  y_breaks = c(-.2, 0, .2)
 )
 
 print(Burnout_plot)
@@ -276,7 +276,7 @@ fear_plot <- draw_plot(
   x_axis = TRUE,
   y_axis = FALSE,
   y_text = "Δ Fear Reports",
-  y_breaks = c(-.3, 0, .3)
+  y_breaks = c(-.4, 0, .4)
 )
 
 print(fear_plot)
