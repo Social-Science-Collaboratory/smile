@@ -16,6 +16,9 @@ df <- read_csv("data/smile25b_processed_data.csv")
 
 # Descriptive statistics
 
+# Number of participants
+print(paste0("Number of participants: ", nrow(df)))
+
 ## Calculate age mean and standard deviation
 print(paste0("Mean age: ", round(mean(df$Age, na.rm=TRUE),2), "; sd: ", round(sd(df$Age, na.rm=TRUE),2)))
 
@@ -47,6 +50,25 @@ print(
     round(mean(df$AU12_scalar_smile, na.rm = TRUE),2),
     "/10 SD = ",
     round(sd(df$AU12_scalar_smile, na.rm = TRUE), 2)
+  )
+)
+
+# Calculate mean and standard deviation of happiness scores across pose conditions
+print(
+  paste0(
+    "Happiness scores (Natural pose): Mean = ",
+    round(mean(df$NP_DEQ_happy_total, na.rm = TRUE), 2),
+    "/10 SD = ",
+    round(sd(df$NP_DEQ_happy_total, na.rm = TRUE), 2)
+  )
+)
+
+print(
+  paste0(
+    "Happiness  scores (Smiling pose): Mean = ",
+    round(mean(df$SP_DEQ_happy_total, na.rm = TRUE),2),
+    "/10 SD = ",
+    round(sd(df$SP_DEQ_happy_total, na.rm = TRUE), 2)
   )
 )
 
@@ -85,12 +107,15 @@ happy_model <- lmer(
   data = df_long
 )
 
-anova(happy_model)
+summary(happy_model)
 
-print(summary(happy_model))
+happy_freq_anova <- as.data.frame(anova(happy_model)) %>%
+  tibble::rownames_to_column("term")
 
 # Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
 happy_emm <- emmeans(happy_model, ~ pose | context + threat + repetition)
+
+summary(happy_emm)
 
 # Extract pairwise comparisons of pose across the other conditions
 happy_emm_pairs <- as.data.frame(pairs(happy_emm)) 
@@ -158,9 +183,20 @@ happy_bf_anova_table <- extract_bf_anova(
 
 print(happy_bf_anova_table)
 
+# Combine frequentist and bayesian anova tables
+
+happy_combined_anova <- happy_freq_anova %>%
+  left_join(happy_bf_anova_table, by = c("term" = "term_dropped"))
+
+# Save combined Anova table for results section
+saveRDS(
+  happy_combined_anova,
+  "data/main_analysis/smile25b_happy_results_anova.Rds"
+)
+
 # Highlight the pre-registered two-way interactions
-happy_bf_anova_table %>%
-  filter(term_dropped %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+happy_combined_anova %>%
+  filter(term %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
   print()
 
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
@@ -180,6 +216,11 @@ happy_stat_summary <- happy_emm_summary %>%
 
 # Summary of inferential statistics of the pose differences conditioned by context, threat, and repetition
 print(happy_stat_summary)
+
+saveRDS(
+  happy_stat_summary,
+  "data/main_analysis/smile25b_happy_results_simple.Rds"
+)
 
 # Sensitivity analysis: Outcome = happiness, dataset = compliant responses only (Hard sensitivity check)
 
@@ -239,7 +280,9 @@ happy_sens_model <- lmer(
   data = df_sens_long
 )
 
-anova(happy_sens_model)
+
+happy_sens_freq_anova <- as.data.frame(anova(happy_sens_model)) %>%
+  tibble::rownames_to_column("term")
 
 # print model coefficient estimates
 print(summary(happy_sens_model))
@@ -312,9 +355,22 @@ happy_sens_bf_anova_table <- extract_bf_anova(happy_sens_bf_anova)
 
 print(happy_sens_bf_anova_table)
 
+# Combine frequentist and bayesian anova tables
+
+happy_sens_combined_anova <- happy_sens_freq_anova %>%
+  left_join(happy_sens_bf_anova_table, by = c("term" = "term_dropped"))
+
+print(happy_sens_combined_anova)
+
+# Save combined Anova table for results section
+saveRDS(
+  happy_sens_combined_anova,
+  "data/main_analysis/smile25b_happy_sens_results_anova.Rds"
+)
+
 # Highlight the pre-registered two-way interactions
-happy_sens_bf_anova_table %>%
-  filter(term_dropped %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+happy_sens_combined_anova %>%
+  filter(term %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
   print()
 
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
@@ -330,8 +386,13 @@ happy_sens_stat_summary <- happy_sens_emm_summary %>%
     by = c("context", "threat", "repetition")
   )
 
-# Summary of inferential statistics of the pose differences conditioned by context, threat, and repetition
+# Summary of simple effect statistics of the pose differences conditioned by context, threat, and repetition
 print(happy_sens_stat_summary)
+
+saveRDS(
+  happy_sens_stat_summary,
+  "data/main_analysis/smile25b_happy_sens_results_simple.Rds"
+)
 
 ## Sensitivity analysis with less stringent scalar coding (Soft sensitivity check)
 
@@ -383,7 +444,8 @@ happy_sens_soft_model <- lmer(
   data = df_sens_soft_long
 )
 
-anova(happy_sens_soft_model)
+happy_sens_soft_freq_anova <- as.data.frame(anova(happy_sens_soft_model)) %>%
+  tibble::rownames_to_column("term")
 
 # print model coefficient estimates
 print(summary(happy_sens_soft_model))
@@ -456,9 +518,20 @@ happy_sens_soft_bf_anova_table <- extract_bf_anova(happy_sens_soft_bf_anova)
 
 print(happy_sens_soft_bf_anova_table)
 
+# Combine frequentist and bayesian anova tables
+
+happy_sens_soft_combined_anova <- happy_sens_soft_freq_anova %>%
+  left_join(happy_sens_soft_bf_anova_table, by = c("term" = "term_dropped"))
+
+# Save combined Anova table for results section
+saveRDS(
+  happy_sens_soft_combined_anova,
+  "data/main_analysis/smile25b_happy_sens_soft_results_anova.Rds"
+)
+
 # Highlight the pre-registered two-way interactions
-happy_sens_soft_bf_anova_table %>%
-  filter(term_dropped %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+happy_sens_soft_combined_anova %>%
+  filter(term %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
   print()
 
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
@@ -476,3 +549,8 @@ happy_sens_soft_stat_summary <- happy_sens_soft_emm_summary %>%
 
 # Summary of inferential statistics of the pose differences conditioned by context, threat, and repetition
 print(happy_sens_soft_stat_summary)
+
+saveRDS(
+  happy_sens_soft_stat_summary,
+  "data/main_analysis/smile25b_happy_sens_soft_results_simple.Rds"
+)

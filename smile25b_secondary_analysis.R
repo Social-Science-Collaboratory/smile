@@ -54,6 +54,9 @@ SWL_model <- lmer(
   data = df_long
 )
 
+SWL_freq_anova <- as.data.frame(anova(SWL_model)) %>%
+  tibble::rownames_to_column("term")
+
 print(summary(SWL_model))
 
 # Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
@@ -117,9 +120,16 @@ SWL_bf_anova_table <- extract_bf_anova(SWL_bf_anova)
 
 print(SWL_bf_anova_table)
 
+# Combine frequentist and bayesian anova tables
+
+SWL_combined_anova <- SWL_freq_anova %>%
+  left_join(SWL_bf_anova_table, by = c("term" = "term_dropped"))
+
+print(SWL_combined_anova)
+
 # Highlight the pre-registered two-way interactions
-SWL_bf_anova_table %>%
-  filter(term_dropped %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+SWL_combined_anova %>%
+  filter(term %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
   print()
 
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
@@ -138,6 +148,12 @@ SWL_stat_summary <- SWL_emm_summary %>%
 # Summary of inferential statistics of the pose differences conditioned by context, threat, and repetition
 print(SWL_stat_summary)
 
+# Save SWL analysis results
+saveRDS(
+  SWL_stat_summary,
+  "data/secondary_analysis/smile25b_SWL_results_simple.Rds"
+)
+
 # Burnout predicted by pose, context, threat, and repetition
 Burnout_model <- lmer(
   Burnout_total ~ pose * context * threat * repetition + (1 | id),
@@ -145,6 +161,10 @@ Burnout_model <- lmer(
 )
 
 print(summary(Burnout_model)) 
+
+# Store model's frequentist ANOVA
+Burnout_freq_anova <- as.data.frame(anova(Burnout_model)) %>%
+  tibble::rownames_to_column("term")
 
 # Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
 Burnout_emm <- emmeans(Burnout_model, ~ pose | context + threat + repetition)
@@ -207,9 +227,15 @@ Burnout_bf_anova_table <- extract_bf_anova(Burnout_bf_anova)
 
 print(Burnout_bf_anova_table)
 
+# Combine frequentist and bayesian anova tables
+Burnout_combined_anova <- Burnout_freq_anova %>%
+  left_join(Burnout_bf_anova_table, by = c("term" = "term_dropped"))
+
+print(Burnout_combined_anova)
+
 # Highlight the pre-registered two-way interactions
-Burnout_bf_anova_table %>%
-  filter(term_dropped %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+Burnout_combined_anova %>%
+  filter(term %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
   print()
 
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
@@ -228,6 +254,12 @@ Burnout_stat_summary <- Burnout_emm_summary %>%
 # Summary of inferential statistics of the pose differences conditioned by context, threat, and repetition
 print(Burnout_stat_summary)
 
+# Save Burnout analysis results
+saveRDS(
+  Burnout_stat_summary,
+  "data/secondary_analysis/smile25b_Burnout_results_simple.Rds"
+)
+
 # Exploratory analysis: Outcome = fear, dataset = full
 
 # Full factorial general linear mixed model of fear predicted by pose, context, threat, and repetition
@@ -237,6 +269,9 @@ fear_model <- lmer(
 )
 
 print(summary(fear_model))
+
+fear_freq_anova <- as.data.frame(anova(fear_model)) %>%
+  tibble::rownames_to_column("term")
 
 # Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
 fear_emm <- emmeans(fear_model, ~ pose | context + threat + repetition)
@@ -299,6 +334,18 @@ fear_bf_anova_table <- extract_bf_anova(fear_bf_anova)
 
 print(fear_bf_anova_table)
 
+# Combine frequentist and bayesian anova tables
+
+fear_combined_anova <- fear_freq_anova %>%
+  left_join(fear_bf_anova_table, by = c("term" = "term_dropped"))
+
+print(fear_combined_anova)
+
+# Highlight the pre-registered two-way interactions
+fear_combined_anova %>%
+  filter(term %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+  print()
+
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
 fear_simple_effects <- compute_bf_simple_effects(
   df_wide = df,
@@ -317,6 +364,12 @@ fear_stat_summary <- fear_emm_summary %>%
 # Summary of inferential statistics of the pose differences conditioned by context, threat, and repetition
 print(fear_stat_summary)
 
+# Save fear analysis results
+saveRDS(
+  fear_stat_summary,
+  "data/secondary_analysis/smile25b_fear_results_simple.Rds"
+)
+
 # Exploratory analysis: Outcome = anger, dataset = full
 
 # Full factorial general linear mixed model of anger predicted by pose, context, threat, and repetition
@@ -326,6 +379,9 @@ anger_model <- lmer(
 )
 
 print(summary(anger_model))
+
+anger_freq_anova <- as.data.frame(anova(anger_model)) %>%
+  tibble::rownames_to_column("term")
 
 # Calculate estimated marginal of pose scores conditioned by context, threat, and repetition
 anger_emm <- emmeans(anger_model, ~ pose | context + threat + repetition)
@@ -388,6 +444,17 @@ anger_bf_anova_table <- extract_bf_anova(anger_bf_anova)
 
 print(anger_bf_anova_table)
 
+# Combine frequentist and bayesian anova tables
+anger_combined_anova <- anger_freq_anova %>%
+  left_join(anger_bf_anova_table, by = c("term" = "term_dropped"))
+
+print(anger_combined_anova)
+
+# Highlight the pre-registered two-way interactions
+anger_combined_anova %>%
+  filter(term %in% c("pose:context", "pose:repetition", "pose:threat")) %>%
+  print()
+
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
 anger_simple_effects <- compute_bf_simple_effects(
   df_wide = df,
@@ -406,6 +473,11 @@ anger_stat_summary <- anger_emm_summary %>%
 # Summary of inferential statistics of the pose differences conditioned by context, threat, and repetition
 print(anger_stat_summary)
 
+# Save anger analysis results
+saveRDS(
+  anger_stat_summary,
+  "data/secondary_analysis/smile25b_anger_results_simple.Rds"
+)
 
 combined_plot <- plot_grid(
   SWL_plot, Burnout_plot,
