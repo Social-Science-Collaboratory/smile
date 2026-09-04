@@ -7,6 +7,7 @@ library(emmeans)
 library(BayesFactor)
 library(ggh4x)
 library(see)
+library(patchwork)
 
 # Source functions used in the Bayesian analyses and figure generation
 source("smile25b_functions.R")
@@ -316,26 +317,23 @@ happy_sens_emm_summary <- happy_sens_emm_pairs %>%
 
 summary(happy_sens_emm_summary)
 
-# Draw the happiness score with the custom function 'draw_plot'
-happy_sens_plot <- draw_plot(
+# Draw the happiness score with the custom function 'draw_plot' (Panel B: weak smiles excluded)
+panel_b <- draw_plot(
   df_wide = df_sens_wide,
   outcome = "DEQ_happy_total",
   outcome_label = "happiness",
   legend_position = "top_right",
   x_axis = TRUE,
-  y_axis = TRUE,
-  y_text = "Δ Happiness Reports (Hard Sensitivity Check)",
+  y_axis = FALSE,
+  y_text = "Δ Happiness Reports",
   y_breaks = c(-1.5, -1, -.5, 0, .5, 1)
-)
-
-print(happy_sens_plot)
-
-# Save plot to figures folder
-ggsave(
-  "figures/smile25b_happy_sens_plot.jpg",
-  plot = happy_sens_plot,
-  width = 12, height = 8, dpi = 300
-)
+) +
+  labs(title = "B. Weak smiles excluded", y = NULL) +
+  theme(
+    axis.line.y  = element_blank(),
+    axis.text.y  = element_blank(),
+    axis.ticks.y = element_blank()
+  )
 
 # Hard sensitivity check Bayesian analysis
 
@@ -479,25 +477,30 @@ happy_sens_soft_emm_summary <- happy_sens_soft_emm_pairs %>%
 
 summary(happy_sens_soft_emm_summary)
 
-# Draw the happiness score with the custom function 'draw_plot'
-happy_sens_soft_plot <- draw_plot(
+# Draw the happiness score with the custom function 'draw_plot' (Panel A: weak smiles included)
+panel_a <- draw_plot(
   df_wide = df_sens_soft_wide,
   outcome = "DEQ_happy_total",
   outcome_label = "happiness",
-  legend_position = "top_right",
+  legend_position = "none",
   x_axis = TRUE,
   y_axis = TRUE,
-  y_text = "Δ Happiness Reports (Soft Sensitivity Check)",
-  y_breaks = c(-1.5, -1, -.5, 0, .5)
-)
+  y_text = "Δ Happiness Reports",
+  y_breaks = c(-1.5, -1, -.5, 0, .5, 1)
+) +
+  labs(title = "A. Weak smiles included")
 
-print(happy_sens_soft_plot)
+# Combine the soft (Panel A) and hard (Panel B) sensitivity checks into one
+# figure, sharing a single y-axis across one row
+sens_plot <- panel_a + panel_b + plot_layout(nrow = 1)
 
-# Save plot to figures folder
+print(sens_plot)
+
+# Save combined sensitivity plot to figures folder
 ggsave(
-  "figures/smile25b_happy_sens_soft_plot.jpg",
-  plot = happy_sens_soft_plot,
-  width = 12, height = 8, dpi = 300
+  "figures/smile25b_sens_plot.jpg",
+  plot = sens_plot,
+  width = 16, height = 8, dpi = 300
 )
 
 # Soft sensitivity check Bayesian analysis
