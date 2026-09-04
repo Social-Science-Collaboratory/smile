@@ -1,0 +1,119 @@
+---
+title: "Supplemental Materials"
+shorttitle: "Smiling and happiness: Supplement"
+author:
+  - name: Nicholas A. Coles
+    corresponding: true
+    email: ncoles@ufl.edu
+    affiliations:
+      - id: ufl
+        name: University of Florida
+        department: Department of Psychology
+        address: 945 Center Dr
+        city: Gainesville
+        region: FL
+        postal-code: "32611"
+  - name: Annabel Dang
+    affiliations:
+      - ref: ufl
+  - name: Joao Francisco Goes Braga Takayanagi
+    affiliations:
+      - ref: ufl
+suppress-abstract: true
+suppress-keywords: true
+bibliography: references.bib
+floatsintext: true
+numbered-lines: false
+mask: false
+draft-date: false
+meta-analysis: false
+format:
+  apaquarto-docx: default
+  apaquarto-pdf:
+    documentmode: doc
+  apaquarto-html:
+    knitr:
+      opts_chunk:
+        dev: png
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(knitr)
+
+# Read processed data and the pairwise-comparison object exported by the main analysis script
+df <- read_csv("../../../../data/smile25b_processed_data.csv", show_col_types = FALSE)
+happy_simple <- readRDS("../../../../data/main_analysis/smile25b_happy_results_simple.Rds")
+
+# Reporting helpers (mirrors smile_R3.qmd's setup chunk)
+num <- function(x, digits = 2) formatC(x, format = "f", digits = digits)
+
+fmt_bf <- function(bf) {
+  ifelse(bf >= 1000, formatC(bf, format = "e", digits = 2), num(bf))
+}
+
+p_stars <- function(p) {
+  case_when(
+    p < .001 ~ "***",
+    p < .01  ~ "**",
+    p < .05  ~ "*",
+    TRUE     ~ ""
+  )
+}
+
+# Cell sizes: context x threat x repetition is a between-subjects grouping,
+# so the same N applies to both the smile and natural pose scores within a cell
+n_cell <- df %>%
+  count(context, threat, repetition, name = "N")
+
+si_table1 <- happy_simple %>%
+  left_join(n_cell, by = c("context", "threat", "repetition")) %>%
+  mutate(
+    ci_low  = estimate - qt(.975, df) * SE,
+    ci_high = estimate + qt(.975, df) * SE,
+    `Emotional Context`     = context,
+    `Movement Repetitions`  = repetition,
+    Punishment              = if_else(threat == "Threat", "yes", "no"),
+    `95% CI`                = paste0("[", num(ci_low), ", ", num(ci_high), "]"),
+    EMM                     = num(estimate),
+    p                       = p_stars(p.value),
+    `BF~10~`                = fmt_bf(BF10),
+    .context_order    = factor(context, levels = c("positive", "negative")),
+    .repetition_order = factor(repetition, levels = c("one", "ten")),
+    .threat_order      = factor(threat, levels = c("No threat", "Threat"))
+  ) %>%
+  arrange(.context_order, .repetition_order, .threat_order) %>%
+  select(`Emotional Context`, `Movement Repetitions`, Punishment, N, EMM, `95% CI`, p, `BF~10~`)
+```
+
+# Supplemental Table 1
+
+**Table S1**
+
+*Pairwise Comparisons of Posed Smiles vs. Natural Expressions on Self-Reported Happiness*
+
+```{r}
+#| label: tbl-si1-output
+#| echo: false
+
+kable(
+  si_table1,
+  align = c("l", "l", "l", "r", "r", "c", "c", "r")
+)
+```
+
+*Note.* EMM = estimated marginal mean of the pose difference (smile − natural), derived
+from `emmeans` pairwise comparisons. CI = confidence interval. BF~10~ = Bayes factor for
+the alternative hypothesis (a pose difference) over the null. \* *p* < .05. \*\* *p* <
+.01. \*\*\* *p* < .001.
+
+# Supplemental Figure 1
+
+![Fig S1. Hard sensitivity check. Differences in self-reported happiness after participants posed happy vs. neutral expressions (y-axis), restricted to participants who complied with facial expression instructions, made no math errors, and were not aware of the study's true purpose. Points represent the estimated marginal mean and error bars represent 95% confidence intervals. Results are visualized separately for each combination of the three experimentally manipulated factors (denoted by x-axis and legend).](../../../../figures/smile25b_happy_sens_plot.jpg){#fig-si1}
+
+# Supplemental Figure 2
+
+![Fig S2. Soft sensitivity check. Differences in self-reported happiness after participants posed happy vs. neutral expressions (y-axis), restricted to participants who made no math errors, were not aware of the study's true purpose, and showed at least a modest increase (AU12 activation difference ≥ 0.5) in smiling during the posed vs. natural condition. Points represent the estimated marginal mean and error bars represent 95% confidence intervals. Results are visualized separately for each combination of the three experimentally manipulated factors (denoted by x-axis and legend).](../../../../figures/smile25b_happy_sens_soft_plot.jpg){#fig-si2}
