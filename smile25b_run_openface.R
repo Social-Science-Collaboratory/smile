@@ -1,4 +1,3 @@
-
 library(here)
 
 # Paths
@@ -6,18 +5,16 @@ proj_dir <- here::here()
 
 # List folders with video recording data from the gorilla survey
 gorilla_folder_list <- Sys.glob(
-  file.path("data", "gorilla_survey", "gorilla-v*-p*"))
+  file.path("data", "gorilla_survey", "gorilla-v*-p*")
+)
 
 # Choose data folder for OpenFace facial expression data (set number from 1 to 8)
-# data_folder <- gorilla_folder_list[[1]]
-
-# Temporary test
-data_folder <- file.path("data", "gorilla_survey", "test")
+data_folder <- gorilla_folder_list[[1]]
 
 # Set input, output, and temporary directories for facial expression processing
-input_dir   <- file.path(data_folder, "uploads")
-temp_dir    <- file.path(data_folder, "temp_videos")
-output_dir  <- file.path(data_folder, "OpenFace_output")
+input_dir <- file.path(data_folder, "uploads")
+temp_dir <- file.path(data_folder, "temp_videos")
+output_dir <- file.path(data_folder, "OpenFace_output")
 
 # Set ffmpeg path for video processing before OpenFace analysis
 # Requires FFmpeg to be installed separately and available on the system PATH.
@@ -36,7 +33,7 @@ openface <- if (os == "Windows") {
 fps <- 10
 
 # Create directories if needed
-dir.create(temp_dir,  recursive = TRUE, showWarnings = FALSE)
+dir.create(temp_dir, recursive = TRUE, showWarnings = FALSE)
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
 # Start timer

@@ -1,8 +1,8 @@
 # Load libraries
 library(tidyverse)
 
-# Initial processing: 
-# - compile questionnaires 
+# Initial processing:
+# - compile questionnaires
 # - remove participants who did not consent to data sharing
 # - Merge Prolific demographic data
 # - remove identifying information (Prolific ID)
@@ -14,14 +14,14 @@ questionnaire_list <- Sys.glob(
 
 # Read the questionaire list, remove header rows, and bind tables into a single dataframe
 df <- lapply(
-    questionnaire_list, function(questionnaire_csv) {
-        df <- read_csv(questionnaire_csv) %>%
-            # Remove rows with no participant ID information
-            filter(!is.na(`Participant Private ID`))
-        return(df)
-    } 
-  ) %>%
-bind_rows()
+  questionnaire_list, function(questionnaire_csv) {
+    df <- read_csv(questionnaire_csv) %>%
+      # Remove rows with no participant ID information
+      filter(!is.na(`Participant Private ID`))
+    return(df)
+  }
+) %>%
+  bind_rows()
 
 ## Check participants who did not consent to participate in the study
 table(df$`ConsentForm object-8 Response`)
@@ -29,7 +29,7 @@ table(df$`ConsentForm object-8 Response`)
 ## Check participants who did not consent to sharing their data after study disclosure
 table(df$`Data_consent object-14 Response`)
 
-## List the IDs of the participants who did not consent to sharing their data 
+## List the IDs of the participants who did not consent to sharing their data
 no_consent_list <- df %>%
   filter(`Data_consent object-14 Response` == "No, I do not want my data used in the research.") %>%
   select(`Participant Private ID`) %>%
@@ -41,22 +41,25 @@ df <- df %>%
 
 ## Pull demographic data from Prolific
 demo_data <- read_csv(
-  file.path("data", "gorilla_survey", "smile25b_prolific_demographic.csv")) %>%
+  file.path("data", "gorilla_survey", "smile25b_prolific_demographic.csv")
+) %>%
   filter(Status == "APPROVED") %>%
   select(`Participant id`, `Ethnicity simplified`) %>%
-  rename(Prolific_ID = `Participant id`,
-         Ethnicity = `Ethnicity simplified`) %>%
+  rename(
+    Prolific_ID = `Participant id`,
+    Ethnicity = `Ethnicity simplified`
+  ) %>%
   mutate(Ethnicity = ifelse(
     Ethnicity == "DATA_EXPIRED",
-    NA, Ethnicity)
-  )
+    NA, Ethnicity
+  ))
 
 # Rename Prolific ID column to match demographic data
 df <- df %>%
   rename(Prolific_ID = `Participant Public ID`)
 
 # Join prolific demographic data into dataframe
-df <- left_join( df, demo_data, by = "Prolific_ID")
+df <- left_join(df, demo_data, by = "Prolific_ID")
 
 ## Remove Prolific ID information from dataframe
 df <- df %>%
@@ -95,7 +98,6 @@ df <- df %>%
     threat = `randomiser-7z4z`,
     group = `randomiser-e9dd`,
     consent = `ConsentForm object-8 Response`,
-
     Fill1pos_math1 = `Fill1pos_math1 object-2 Value`,
     Fill1pos_DEQ_happiness = `Fill1pos_DEQ object-6 happiness\n`,
     Fill1pos_DEQ_satisfaction = `Fill1pos_DEQ object-6 satisfaction\n`,
@@ -118,7 +120,6 @@ df <- df %>%
     Fill1pos_math2 = `Fill1pos_math2 object-211 Value`,
     Fill1pos_math3 = `Fill1pos_math3 object-22 Value`,
     Fill1pos_math4 = `Fill1pos_math4 object-23 Value`,
-
     Fill4pos_math1 = `Fill4pos_math1 object-2 Value`,
     Fill4pos_DEQ_happiness = `Fill4pos_DEQ object-6 happiness\n`,
     Fill4pos_DEQ_satisfaction = `Fill4pos_DEQ object-6 satisfaction\n`,
@@ -141,7 +142,6 @@ df <- df %>%
     Fill4pos_math2 = `Fill4pos_math2 object-211 Value`,
     Fill4pos_math3 = `Fill4pos_math3 object-22 Value`,
     Fill4pos_math4 = `Fill4pos_math4 object-23 Value`,
-
     Purpose = `Purpose object-2 Value`,
     Concealment = `Concealment object-5 Value`,
     Age = `Age object-7 Value`,
@@ -150,7 +150,6 @@ df <- df %>%
     Data_consent = `Data_consent object-14 Response`,
     Display_check = `Multiple Choice object-21 Response`
   )
-
 
 # Outcome variable data is spread across different Gorilla task blocks due to the randomization/branching pipeline
 # Use coalesce (extract the first non-NA value) across matching blocks to obtain the outcome value
@@ -213,7 +212,7 @@ df <- df %>%
   group_by(Gorilla_ID) %>%
   summarise(
     across(where(is.character), ~ first(na.omit(na_if(.x, "")))),
-    across(where(is.numeric),   ~ first(na.omit(.x))),
+    across(where(is.numeric), ~ first(na.omit(.x))),
     .groups = "drop"
   )
 
@@ -224,19 +223,25 @@ df <- df %>%
     # Check if the group label contains the "Pos" string
     context = if_else(
       str_detect(
-        group, "Pos"),
-      "positive", "negative"),
+        group, "Pos"
+      ),
+      "positive", "negative"
+    ),
     # Check if the group label contains the "One" string
     repetition = if_else(
       str_detect(
-        group, "One"),
-      "one", "ten")
+        group, "One"
+      ),
+      "one", "ten"
+    )
   ) %>%
   # Reorder variables in the dataframe
   relocate(context, repetition,
-     .after = group) %>%
+    .after = group
+  ) %>%
   relocate(Purpose, Concealment, Age, Gender, Ethnicity, Quality_issues, Data_consent, Display_check,
-    .after = last_col()) %>%
+    .after = last_col()
+  ) %>%
   # Convert outcome variables to numeric
   mutate(across(Fill1pos_math1:NP_math4, as.numeric))
 
@@ -248,14 +253,14 @@ scale_mean <- function(df, cols) rowMeans(select(df, all_of(cols)), na.rm = TRUE
 task_prefixes <- c("Fill1pos", "NP", "SP", "Fill4pos")
 
 # Set DEQ subscale item names
-deq_happy_items   <- c("DEQ_happiness", "DEQ_satisfaction", "DEQ_enjoyment")
-deq_fear_items  <- c("DEQ_alarmed", "DEQ_scared", "DEQ_fear")
+deq_happy_items <- c("DEQ_happiness", "DEQ_satisfaction", "DEQ_enjoyment")
+deq_fear_items <- c("DEQ_alarmed", "DEQ_scared", "DEQ_fear")
 deq_anger_items <- c("DEQ_irritation", "DEQ_aggravation", "DEQ_annoyance")
 
 # Compute scale scores for each task/DEQ subscale and position composite score after the last item
 for (pfx in task_prefixes) {
-  happy_cols   <- paste0(pfx, "_", deq_happy_items)
-  fear_cols  <- paste0(pfx, "_", deq_fear_items)
+  happy_cols <- paste0(pfx, "_", deq_happy_items)
+  fear_cols <- paste0(pfx, "_", deq_fear_items)
   anger_cols <- paste0(pfx, "_", deq_anger_items)
 
   if (all(happy_cols %in% names(df))) {
@@ -307,14 +312,16 @@ for (pfx in task_prefixes) {
 }
 
 # Clean worksapce
-rm(task_prefixes, deq_happy_items, deq_anger_items, deq_fear_items,
-   anger_cols, fear_cols, happy_cols, swl_items, burnout_items, 
-   pfx, cols, composite_col)
+rm(
+  task_prefixes, deq_happy_items, deq_anger_items, deq_fear_items,
+  anger_cols, fear_cols, happy_cols, swl_items, burnout_items,
+  pfx, cols, composite_col
+)
 
 # Pull facial expression compliance data from OpenFace processing code
 openface_results <- read_csv("data/smile25b_openface_processed.csv") %>%
   mutate(Gorilla_ID = as.numeric(Gorilla_ID))
-  
+
 
 # Join openface compliance data with main data frame
 df <- left_join(df, openface_results, by = "Gorilla_ID")
@@ -330,17 +337,14 @@ math_sol <- c(
   Fill1pos_math2 = 2,
   Fill1pos_math3 = 6,
   Fill1pos_math4 = 4,
-
   Fill4pos_math1 = 8,
   Fill4pos_math2 = 1,
   Fill4pos_math3 = 9,
   Fill4pos_math4 = 2,
-
   SP_math1 = 5,
   SP_math2 = 4,
   SP_math3 = 7,
   SP_math4 = 3,
-
   NP_math1 = 7,
   NP_math2 = 4,
   NP_math3 = 8,

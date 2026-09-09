@@ -1,6 +1,6 @@
 # Smiling your way to happiness or misery? Experimental tests of competing perspectives
 
-Authors: Nicholas A. Coles, Annabel Dang, and Joao Francisco Goes Braga Takayanagi
+Authors: Nicholas A. Coles, Annabel V. Dang, and Joao Francisco Goes Braga Takayanagi
 
 This repository contains the data, code, materials, and manuscript for a pre-registered experiment testing whether posed smiles improve or worsen mood depending on emotional context, repetition, and threat of punishment. The most important files are `smile25b_process_data.R` (builds the analysis dataset), `smile25b_main_analysis.R` (runs the main analyses and figures), and `writing/smile_R3_writing.qmd` (the manuscript). Everything else is listed below.
 

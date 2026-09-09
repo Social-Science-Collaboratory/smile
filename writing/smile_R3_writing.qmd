@@ -46,13 +46,13 @@ library(BayesFactor)
 # Read processed data and the analysis objects exported by the analysis scripts
 df <- read_csv("../data/smile25b_processed_data.csv", show_col_types = FALSE)
 
-happy_anova  <- readRDS("../data/main_analysis/smile25b_happy_results_anova.Rds")
+happy_anova <- readRDS("../data/main_analysis/smile25b_happy_results_anova.Rds")
 happy_simple <- readRDS("../data/main_analysis/smile25b_happy_results_simple.Rds")
 
 burnout_simple <- readRDS("../data/secondary_analysis/smile25b_Burnout_results_simple.Rds")
-swl_simple     <- readRDS("../data/secondary_analysis/smile25b_SWL_results_simple.Rds")
-fear_simple    <- readRDS("../data/secondary_analysis/smile25b_fear_results_simple.Rds")
-anger_simple   <- readRDS("../data/secondary_analysis/smile25b_anger_results_simple.Rds")
+swl_simple <- readRDS("../data/secondary_analysis/smile25b_SWL_results_simple.Rds")
+fear_simple <- readRDS("../data/secondary_analysis/smile25b_fear_results_simple.Rds")
+anger_simple <- readRDS("../data/secondary_analysis/smile25b_anger_results_simple.Rds")
 
 # Reporting helpers
 
@@ -75,81 +75,81 @@ bound_min <- function(x, digits = 2) num(floor(min(x) * 10^digits) / 10^digits, 
 
 ## Pull one condition out of a simple effects table
 cell <- function(results, ctx, thr, rep) {
-  results %>% filter(context == ctx, threat == thr, repetition == rep)
+    results %>% filter(context == ctx, threat == thr, repetition == rep)
 }
 
 # Manipulation check: did participants smile more when asked to pose a smile?
 au12 <- df %>%
-  select(AU12_scalar_smile, AU12_scalar_natura) %>%
-  drop_na()
+    select(AU12_scalar_smile, AU12_scalar_natura) %>%
+    drop_na()
 
 au12_test <- t.test(au12$AU12_scalar_smile, au12$AU12_scalar_natura, paired = TRUE)
-au12_bf   <- extractBF(ttestBF(au12$AU12_scalar_smile, au12$AU12_scalar_natura, paired = TRUE))$bf
+au12_bf <- extractBF(ttestBF(au12$AU12_scalar_smile, au12$AU12_scalar_natura, paired = TRUE))$bf
 
 au12_desc <- au12 %>%
-  summarise(
-    smile_m    = mean(AU12_scalar_smile),   smile_sd   = sd(AU12_scalar_smile),
-    natural_m  = mean(AU12_scalar_natura),  natural_sd = sd(AU12_scalar_natura)
-  )
+    summarise(
+        smile_m    = mean(AU12_scalar_smile),   smile_sd   = sd(AU12_scalar_smile),
+        natural_m  = mean(AU12_scalar_natura),  natural_sd = sd(AU12_scalar_natura)
+    )
 
 # Demographics
 n_total <- nrow(df)
-age_m   <- mean(df$Age, na.rm = TRUE)
-age_sd  <- sd(df$Age, na.rm = TRUE)
+age_m <- mean(df$Age, na.rm = TRUE)
+age_sd <- sd(df$Age, na.rm = TRUE)
 
 ## Gender and ethnicity percentages, with remaining categories collapsed into "Other"
 gender_pct <- df %>%
-  mutate(group = if_else(Gender %in% c("Male", "Female"), Gender, "Other")) %>%
-  count(group) %>%
-  mutate(pct = n / n_total * 100) %>%
-  select(group, pct) %>%
-  deframe()
+    mutate(group = if_else(Gender %in% c("Male", "Female"), Gender, "Other")) %>%
+    count(group) %>%
+    mutate(pct = n / n_total * 100) %>%
+    select(group, pct) %>%
+    deframe()
 
 ethnicity_pct <- df %>%
-  mutate(group = if_else(Ethnicity %in% c("White", "Black", "Mixed", "Asian"), Ethnicity, "Other")) %>%
-  count(group) %>%
-  mutate(pct = n / n_total * 100) %>%
-  select(group, pct) %>%
-  deframe()
+    mutate(group = if_else(Ethnicity %in% c("White", "Black", "Mixed", "Asian"), Ethnicity, "Other")) %>%
+    count(group) %>%
+    mutate(pct = n / n_total * 100) %>%
+    select(group, pct) %>%
+    deframe()
 
 ## Percentage whose posed smiles exceeded the AU12 compliance threshold
 compliance_pct <- mean(df$face_compliance_scalar, na.rm = TRUE) * 100
 
 # Self-reported happiness by emotional context, collapsing across pose
 happy_by_context <- df %>%
-  pivot_longer(c(SP_DEQ_happy_total, NP_DEQ_happy_total), values_to = "happy") %>%
-  group_by(context) %>%
-  summarise(M = mean(happy, na.rm = TRUE), SD = sd(happy, na.rm = TRUE))
+    pivot_longer(c(SP_DEQ_happy_total, NP_DEQ_happy_total), values_to = "happy") %>%
+    group_by(context) %>%
+    summarise(M = mean(happy, na.rm = TRUE), SD = sd(happy, na.rm = TRUE))
 
 happy_positive <- happy_by_context %>% filter(context == "positive")
 happy_negative <- happy_by_context %>% filter(context == "negative")
 
 # ANOVA terms reported in the Results
 happy_anova <- happy_anova %>%
-  rename(F_value = `F value`, p_value = `Pr(>F)`)
+    rename(F_value = `F value`, p_value = `Pr(>F)`)
 
-anova_pose      <- happy_anova %>% filter(term == "pose")
-anova_context   <- happy_anova %>% filter(term == "context")
+anova_pose <- happy_anova %>% filter(term == "pose")
+anova_context <- happy_anova %>% filter(term == "context")
 anova_three_way <- happy_anova %>% filter(term == "pose:context:repetition")
 
 # 95% CIs for the unstandardized pose differences
 happy_simple <- happy_simple %>%
-  mutate(
-    ci_low  = estimate - qt(.975, df) * SE,
-    ci_high = estimate + qt(.975, df) * SE
-  )
+    mutate(
+        ci_low  = estimate - qt(.975, df) * SE,
+        ci_high = estimate + qt(.975, df) * SE
+    )
 
 # Happiness conditions reported individually
-pos_one_free   <- cell(happy_simple, "positive", "No threat", "one")
-neg_one_free   <- cell(happy_simple, "negative", "No threat", "one")
+pos_one_free <- cell(happy_simple, "positive", "No threat", "one")
+neg_one_free <- cell(happy_simple, "negative", "No threat", "one")
 neg_one_threat <- cell(happy_simple, "negative", "Threat", "one")
 
 # Happiness conditions reported as a group
 pos_other <- happy_simple %>%
-  filter(context == "positive", !(threat == "No threat" & repetition == "one"))
+    filter(context == "positive", !(threat == "No threat" & repetition == "one"))
 
 neg_ten <- happy_simple %>%
-  filter(context == "negative", repetition == "ten")
+    filter(context == "negative", repetition == "ten")
 
 # Burnout and satisfaction with life, reported together
 wellbeing <- bind_rows(burnout_simple, swl_simple)
@@ -157,8 +157,8 @@ wellbeing <- bind_rows(burnout_simple, swl_simple)
 # Fear and anger conditions
 fear_neg_ten <- fear_simple %>% filter(context == "negative", repetition == "ten")
 
-anger_negative       <- anger_simple %>% filter(context == "negative")
-anger_pos_one_free   <- cell(anger_simple, "positive", "No threat", "one")
+anger_negative <- anger_simple %>% filter(context == "negative")
+anger_pos_one_free <- cell(anger_simple, "positive", "No threat", "one")
 anger_pos_ten_threat <- cell(anger_simple, "positive", "Threat", "ten")
 ```
 
@@ -229,28 +229,26 @@ The emotion incongruence, repetition, and punishment hypotheses all predicted a 
 ```
 
 ::: {#tbl-patterns}
-+-------------------------------------------------------------------+------------------------------------------------------------+-------------+
-| `\centering`{=latex}**Factor Levels**\                            | `\centering`{=latex}**Hypotheses**\                        |             |
-| `\rule{\linewidth}{0.8pt}`{=latex}                                | `\rule{\linewidth}{0.8pt}`{=latex}                         |             |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-| **Emotional Context** | **Movement Repetitions** | **Punishment** | **Emotion Incongruence** | **Repetition** | **Punishment** | **Results** |
-+=======================+==========================+================+==========================+================+================+=============+
-| positive              | one                      | no             | \+                       | \+             | \+             |             |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-|                       |                          | yes            | \+                       | \+             |                | \-          |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-|                       | ten                      | no             | \+                       |                | \+             | \-          |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-|                       |                          | yes            | \+                       |                |                | \-          |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-| negative              | one                      | no             |                          | \+             | \+             | \+          |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-|                       |                          | yes            |                          | \+             |                | \+          |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-|                       | ten                      | no             |                          |                | \+             | \+          |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
-|                       |                          | yes            |                          |                |                |             |
-+-----------------------+--------------------------+----------------+--------------------------+----------------+----------------+-------------+
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+|          |         |         |         | `\centering`{=latex}**Factor Levels**\ | `\centering`{=latex}**Hypotheses**\ |        |
+|          |         |         |         | `\rule{\linewidth}{0.8pt}`{=latex}     | `\rule{\linewidth}{0.8pt}`{=latex}  |        |
++==========+=========+=========+=========+========================================+=====================================+========+
+| positive | one     | no      | \+      | \+                                     | \+                                  |        |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+|          |         | yes     | \+      | \+                                     |                                     | \-     |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+|          | ten     | no      | \+      |                                        | \+                                  | \-     |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+|          |         | yes     | \+      |                                        |                                     | \-     |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+| negative | one     | no      |         | \+                                     | \+                                  | \+     |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+|          |         | yes     |         | \+                                     |                                     | \+     |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+|          | ten     | no      |         |                                        | \+                                  | \+     |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
+|          |         | yes     |         |                                        |                                     |        |
++----------+---------+---------+---------+----------------------------------------+-------------------------------------+--------+
 
 Overview of hypothesized patterns and observed results when examining the simple effects of Face Movement in a 2 (Face Movement: pose smile, express naturally) x 2 (Movement Repetitions: one time, ten times) x 2 (Emotional Context: positive, negative) x 2 (Punishment threat: present, absent) design. For each joint condition of Factors (e.g., one movement repetition, positive context, with the potential for punishment), +'s and -'s denote positive and negative effect of Face Movement on self-reported happiness, respectively. Blank cells denote a hypothesized null effect. Potential patterns are shown separately for the emotion incongruence, repetition, and punishment hypotheses.
 :::
@@ -287,7 +285,7 @@ Our tested hypotheses was more strongly refuted in the positive emotional contex
 
 In negative emotional contexts, posing a single smile led to small improvements in self-reported happiness. This occurred regardless of whether smiles were posed voluntar*y* (*t*(`r round(neg_one_free$df)`) = `r num(neg_one_free$t.ratio)`, *p* `r fmt_p(neg_one_free$p.value)`, d = `r num(neg_one_free$estimate)`, 95% CI \[`r num(neg_one_free$ci_low)`, `r num(neg_one_free$ci_high)`\], BF~10~ `r fmt_bf(neg_one_free$BF10)`) or under threat of punishment (*t*(`r round(neg_one_threat$df)`) = `r num(neg_one_threat$t.ratio)`, *p* `r fmt_p(neg_one_threat$p.value)`, d = `r num(neg_one_threat$estimate)`, 95% CI \[`r num(neg_one_threat$ci_low)`, `r num(neg_one_threat$ci_high)`\], BF~10~ `r fmt_bf(neg_one_threat$BF10)`). When repeated 10 times, however, posing smiles in negative contexts led to virtually no shift self-reported happiness (regardless of punishment; all *t* \< `r bound_max(neg_ten$t.ratio)`, all *p* \> `r drop_zero(bound_min(neg_ten$p.value, 3))`, all d \< `r bound_max(neg_ten$estimate)`, all BF~01~ \> `r bound_min(1 / neg_ten$BF10)`; @fig-happy).
 
-![Primary results. Differences in self-reported happiness after participants posed happy vs. neutral expressions (y-axis). Points represent the estimated marginal mean and error bars represent 95% confidence intervals. Results are visualized separately for each combination of the three experimentally manipulated factors (denoted by x-axis and legend).](../figures/smile25b_happy_plot.jpg){#fig-happy}
+![Primary results. Differences in self-reported happiness after participants posed happy vs. natural expressions (y-axis). Points represent the estimated marginal mean and error bars represent 95% confidence intervals. Results are visualized separately for each combination of the three experimentally manipulated factors (denoted by x-axis and legend).](../figures/smile25b_happy_plot.jpg){#fig-happy}
 
 ## Exploratory Results
 
@@ -295,7 +293,7 @@ Although outside our primary scope, we also examined whether posed smiles impact
 
 We additionally examined self-reported fear and anger -- measures initially included to distract participants from our interest in happiness. For fear, we found some evidence of decreases among participants who posed 10 consecutive smiles in negative contexts (all *t* \< `r bound_max(fear_neg_ten$t.ratio)`, all d \< `r bound_max(fear_neg_ten$estimate)`, all *p* \< `r drop_zero(bound_max(fear_neg_ten$p.value, 3))`; Figure 2C). Bayesian analyses, however, were inconclusive (BF~10~ \> `r bound_min(fear_neg_ten$BF10)`). For anger, results were more conclusive (Figure 2D). In negative contexts, posing smiles led to little-to-no shift in self-reported anger (all *t* \< `r bound_max(anger_negative$t.ratio)`, all d \< `r bound_max(anger_negative$estimate)`, all *p* \> `r drop_zero(bound_min(anger_negative$p.value, 3))`, all BF~10~ \< `r bound_max(anger_negative$BF10)`). In positive contexts, however, posing smiles consistently increased anger. This occurred regardless of whether participants posed smiles (a) once and voluntarily (*t*(`r round(anger_pos_one_free$df)`) = `r num(anger_pos_one_free$t.ratio)`, d = `r num(anger_pos_one_free$estimate)`, *p* `r fmt_p(anger_pos_one_free$p.value)`, BF~10~ `r fmt_bf(anger_pos_one_free$BF10)`) vs. (b) ten times under threat of punishment (*t*(`r round(anger_pos_ten_threat$df)`) = `r num(anger_pos_ten_threat$t.ratio)`, d = `r num(anger_pos_ten_threat$estimate)`, *p* `r fmt_p(anger_pos_ten_threat$p.value)`, BF~10~ `r fmt_bf(anger_pos_ten_threat$BF10)`).
 
-![Secondary results. Differences in self-reported satisfaction with life (panel A), burnout (panel B), fear (panel C), and anger (panel D) after participants posed happy vs. neutral expressions (y-axis). Points represent the estimated marginal mean and error bars represent 95% confidence intervals. Results are visualized separately for each combination of the three experimentally manipulated factors (denoted by x-axis and legend).](../figures/smile25b_combined_secondary_plot.jpg){#fig-secondary}
+![Secondary results. Differences in self-reported satisfaction with life (panel A), burnout (panel B), fear (panel C), and anger (panel D) after participants posed happy vs. natural expressions (y-axis). Points represent the estimated marginal mean and error bars represent 95% confidence intervals. Results are visualized separately for each combination of the three experimentally manipulated factors (denoted by x-axis and legend).](../figures/smile25b_combined_secondary_plot.jpg){#fig-secondary}
 
 # Discussion
 
@@ -317,7 +315,7 @@ Last, we note that participants often posed relatively weak, non-prototypical ex
 
 ## Concluding Remarks
 
-Although often framed as competing hypotheses, our results ultimately illustrate that there is a duality of posed smiles. In some contexts, posed smiles can be the source of our happiness -- in others, a far more powerful source of our misery. \
+Although often framed as competing hypotheses, our results ultimately illustrate that there is a duality of posed smiles. In some contexts, posed smiles can be the source of our happiness -- in others, a far more powerful source of our misery.\
 
 ```{=latex}
 \clearpage

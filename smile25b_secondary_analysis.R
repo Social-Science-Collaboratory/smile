@@ -3,7 +3,7 @@ library(tidyverse)
 library(lmerTest)
 library(emmeans)
 library(BayesFactor)
-library(ggh4x) 
+library(ggh4x)
 library(cowplot)
 
 # Source functions used in the Bayesian analyses and figure generation
@@ -20,7 +20,7 @@ df <- read_csv("data/smile25b_processed_data.csv")
 # Prepare dataframe for data analysis
 df_long <- df %>%
   # create a unique participant id
-  mutate(id = row_number()) %>%   
+  mutate(id = row_number()) %>%
   select(
     id, threat, context, repetition,
     SP_DEQ_happy_total, SP_DEQ_fear_total, SP_DEQ_anger_total,
@@ -32,7 +32,7 @@ df_long <- df %>%
   # Pivot smile and natural pose columns into long format
   pivot_longer(
     cols = c(starts_with("SP_"), starts_with("NP_")),
-    names_to = c("pose", ".value"),       
+    names_to = c("pose", ".value"),
     names_pattern = "^(SP|NP)_(.*)$"
   ) %>%
   # recode pose variable into readable labels
@@ -90,7 +90,7 @@ summary(SWL_emm_summary)
 
 # Draw the SWL score with the custom function 'draw_plot'
 SWL_plot <- draw_plot(
-  df_wide = df, 
+  df_wide = df,
   outcome = "SWL_total",
   outcome_label = "satisfaction with life",
   legend_position = "none",
@@ -160,7 +160,7 @@ Burnout_model <- lmer(
   data = df_long
 )
 
-print(summary(Burnout_model)) 
+print(summary(Burnout_model))
 
 # Store model's frequentist ANOVA
 Burnout_freq_anova <- as.data.frame(anova(Burnout_model)) %>%
@@ -197,7 +197,7 @@ summary(Burnout_emm_summary)
 
 # Draw the Burnout score with the custom function 'draw_plot'
 Burnout_plot <- draw_plot(
-  df_wide = df, 
+  df_wide = df,
   outcome = "Burnout_total",
   outcome_label = "burnout",
   legend_position = "top_right",
@@ -304,7 +304,7 @@ summary(fear_emm_summary)
 
 # Draw the Fear score with the custom function 'draw_plot'
 fear_plot <- draw_plot(
-  df_wide = df, 
+  df_wide = df,
   outcome = "DEQ_fear_total",
   outcome_label = "fear",
   legend_position = "none",
@@ -349,7 +349,8 @@ fear_combined_anova %>%
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
 fear_simple_effects <- compute_bf_simple_effects(
   df_wide = df,
-  outcome = "DEQ_fear_total")
+  outcome = "DEQ_fear_total"
+)
 
 print(fear_simple_effects)
 
@@ -414,7 +415,7 @@ summary(anger_emm_summary)
 
 # Draw the Anger score with the custom function 'draw_plot'
 anger_plot <- draw_plot(
-  df_wide = df, 
+  df_wide = df,
   outcome = "DEQ_anger_total",
   outcome_label = "anger",
   legend_position = "none",
@@ -458,7 +459,8 @@ anger_combined_anova %>%
 # Compute the Bayes Factor simple effects with the custom function 'compute_bf_simple_effects'
 anger_simple_effects <- compute_bf_simple_effects(
   df_wide = df,
-  outcome = "DEQ_anger_total")
+  outcome = "DEQ_anger_total"
+)
 
 print(anger_simple_effects)
 
@@ -482,7 +484,7 @@ saveRDS(
 combined_plot <- plot_grid(
   SWL_plot, Burnout_plot,
   fear_plot, anger_plot,
-  labels = c('a)', 'b)', 'c)', 'd)'),
+  labels = c("a)", "b)", "c)", "d)"),
   label_x = 0.05,
   ncol = 2
 )
@@ -493,4 +495,4 @@ ggsave(
   "figures/smile25b_combined_secondary_plot.jpg",
   plot = combined_plot,
   width = 14, height = 10, dpi = 300
-  )
+)

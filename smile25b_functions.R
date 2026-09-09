@@ -1,11 +1,9 @@
-
-
 # Function: Prepare the per-participant smile - natural difference scores, used to
 # draw the point estimate + error bar plot (positive = smiling increased the outcome)
 
 draw_plot <- function(
-  df_wide, 
-  outcome_label, 
+  df_wide,
+  outcome_label,
   outcome,
   legend_position = c("top_right", "bottom_right", "none"),
   x_axis = TRUE,
@@ -13,7 +11,6 @@ draw_plot <- function(
   y_text,
   y_breaks
 ) {
-
   legend_position <- match.arg(legend_position)
 
   # Set the y-axis range from the outermost hard-coded breaks
@@ -66,7 +63,7 @@ draw_plot <- function(
       error_max = diff_mean + 1.96 * SE
     )
 
-  # Prepare pose effect direction labels that indicate the direction of the pose effect 
+  # Prepare pose effect direction labels that indicate the direction of the pose effect
   direction_label_data <- data.frame(
     # Set x-axis positioning
     x = 0.5,
@@ -80,8 +77,7 @@ draw_plot <- function(
   )
 
   # Legend placement: draw legend at the top right, bottom right, or hide
-  legend_theme <- switch(
-    legend_position,
+  legend_theme <- switch(legend_position,
     top_right = theme(
       legend.position = "inside",
       legend.position.inside = c(.95, .98),
@@ -107,7 +103,7 @@ draw_plot <- function(
   } else {
     NULL
   }
-  
+
   # Optionally show facet strip labels and nesting line (acts as the x-axis grouping)
   nest_line_element <- if (x_axis) {
     element_line(colour = "black", linewidth = 1)
@@ -148,7 +144,7 @@ draw_plot <- function(
     direction_labels +
     # Create nested facet labels using the ggh4x package
     ggh4x::facet_nested(
-      # Nest the threat factor within the repetition factor 
+      # Nest the threat factor within the repetition factor
       . ~ repetition_label + threat_label,
       # Position facet labels on the bottom
       switch = "x",
@@ -159,7 +155,7 @@ draw_plot <- function(
         background_x = list(
           element_rect(linewidth = 0, fill = "white"),
           element_blank()
-        ) 
+        )
       )
     ) +
     scale_colour_manual(
@@ -180,10 +176,10 @@ draw_plot <- function(
     theme_classic(base_size = 16) +
     theme(
       panel.background = element_rect(fill = "white", colour = "white"),
-      plot.background  = element_rect(fill = "white", colour = "white"),
-      plot.margin      = margin(t = 25, r = 25, b = 15, l = 15),
-      axis.text.x      = element_blank(),
-      axis.ticks.x     = element_blank(),
+      plot.background = element_rect(fill = "white", colour = "white"),
+      plot.margin = margin(t = 25, r = 25, b = 15, l = 15),
+      axis.text.x = element_blank(),
+      axis.ticks.x = element_blank(),
       legend.key.width = unit(4, "lines"),
       legend.key.height = unit(1.5, "lines"),
       legend.text = element_text(size = 14)
@@ -200,11 +196,10 @@ draw_plot <- function(
 
 # Function: Compute the Bayes Factor ANOVA for a generic outcome variable
 compute_bf_anova <- function(df_long, outcome) {
-
   # Remove incomplete cases and convert predictors to factors for the BayesFactor analysis
   df_bf <- df_long %>%
-    select(id, pose, context, threat, repetition, {{outcome}}) %>%
-    drop_na(id, pose, context, threat, repetition, {{outcome}}) %>%
+    select(id, pose, context, threat, repetition, {{ outcome }}) %>%
+    drop_na(id, pose, context, threat, repetition, {{ outcome }}) %>%
     mutate(
       id = factor(id),
       pose = factor(pose),
@@ -216,7 +211,7 @@ compute_bf_anova <- function(df_long, outcome) {
 
   # Confirmatory Bayesian ANOVA-style tests of main effects and interactions
   # using default (medium Cauchy, r = 1/2) priors and default MCMC settings.
-  
+
   # Prepare the anovaBF formula using the outcome variable input
   bf_formula <- as.formula(
     paste0(outcome, " ~ pose * context * threat * repetition + id")
@@ -230,17 +225,17 @@ compute_bf_anova <- function(df_long, outcome) {
     whichRandom = "id",
     whichModels = "top"
   )
-  
+
   return(outcome_bf_anova)
 }
 
 # Function: Extract main and interaction effect estimates from the Bayesian ANOVA object
 extract_bf_anova <- function(outcome_bf_anova) {
-
   # Extract all main and interaction effects from the full factorial model
   full_model_terms <- attr(
-    terms(~ pose * context * threat * repetition), 
-    "term.labels")
+    terms(~ pose * context * threat * repetition),
+    "term.labels"
+  )
 
   outcome_bf_anova_table <- outcome_bf_anova %>%
     # Extract Bayes Factor estimates and convert to dataframe
@@ -260,7 +255,7 @@ extract_bf_anova <- function(outcome_bf_anova) {
     ) %>%
     ungroup() %>%
     # Remove unused variables
-    select(-included_terms, -model_included, -bf, -error)  %>%
+    select(-included_terms, -model_included, -bf, -error) %>%
     # Reorder rows and columns
     relocate(term_dropped, .before = 1) %>%
     arrange(desc(row_number()))
@@ -272,7 +267,6 @@ extract_bf_anova <- function(outcome_bf_anova) {
 # within each combination of the context x threat x repetition conditions.
 
 compute_bf_simple_effects <- function(df_wide, outcome) {
-
   # Set Smile pose and Natural pose outcome variable names
   SP_outcome <- paste0("SP_", outcome)
   NP_outcome <- paste0("NP_", outcome)
@@ -286,7 +280,7 @@ compute_bf_simple_effects <- function(df_wide, outcome) {
     mutate(
       # For each condition combination, extract cases with complete outcome scores
       result = pmap(list(context, threat, repetition), function(ctx, thr, rep) {
-        cell_data <- df_wide  %>%
+        cell_data <- df_wide %>%
           filter(context == ctx, threat == thr, repetition == rep) %>%
           drop_na(all_of(SP_outcome), all_of(NP_outcome))
 
@@ -310,6 +304,6 @@ compute_bf_simple_effects <- function(df_wide, outcome) {
     ) %>%
     # Extract the n, BF10, and error_pct columns nested in the result column
     unnest(result)
-  
+
   return(outcome_simple_effects)
 }

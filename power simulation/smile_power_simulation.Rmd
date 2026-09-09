@@ -27,7 +27,7 @@ set.seed(1967)
 
 ```{r}
 # load data
-DF <- readRDS('DF.l.full.rds')  %>% 
+DF <- readRDS(here("power simulation", "DF.l.full.rds")) %>%
   
   # focus on conditions being replicated
   filter(image == 'present', 
