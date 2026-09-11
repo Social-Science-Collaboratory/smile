@@ -42,7 +42,7 @@ library(knitr)
 df <- read_csv("../data/smile25b_processed_data.csv", show_col_types = FALSE)
 happy_simple <- readRDS("../data/main_analysis/smile25b_happy_results_simple.Rds")
 
-# Reporting helpers (mirrors smile_R3.qmd's setup chunk)
+# Reporting helpers (mirrors smile25b_writing.qmd's setup chunk)
 num <- function(x, digits = 2) formatC(x, format = "f", digits = digits)
 
 fmt_bf <- function(bf) {
