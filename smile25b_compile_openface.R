@@ -104,6 +104,32 @@ openface_results_summ <- openface_results |>
         )
     )
 
+# List the IDs of the participants who did not consent to sharing their data.
+# This script runs independently of smile25b_process_data.R, so the same filter
+# is applied here to keep non-consenting participants out of the shared file.
+questionnaire_list <- Sys.glob(
+    file.path("data", "gorilla_survey", "gorilla-v*-p*", "data_exp_262549-v*_questionnaires.csv")
+)
+
+no_consent_list <- lapply(
+    questionnaire_list, function(questionnaire_csv) {
+        read_csv(questionnaire_csv, show_col_types = FALSE) |>
+            filter(
+                `Data_consent object-14 Response` ==
+                    "No, I do not want my data used in the research."
+            ) |>
+            select(`Participant Private ID`)
+    }
+) |>
+    bind_rows() |>
+    pull(`Participant Private ID`) |>
+    unique() |>
+    as.character()
+
+# Remove participants who did not consent to data sharing
+openface_results_summ <- openface_results_summ |>
+    filter(!(Gorilla_ID %in% no_consent_list))
+
 # Check openface compliance distribution
 # Scalar (1.5 out 5 difference in smile vs natural conditions)
 table(openface_results_summ$face_compliance_scalar)

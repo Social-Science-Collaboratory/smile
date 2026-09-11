@@ -5,7 +5,7 @@ library(tidyverse)
 # - compile questionnaires
 # - remove participants who did not consent to data sharing
 # - Merge Prolific demographic data
-# - remove identifying information (Prolific ID)
+# - remove identifying information (Prolific participant and submission IDs)
 
 # List gorilla questionnaire .csv files across the data batch folders
 questionnaire_list <- Sys.glob(
@@ -64,6 +64,10 @@ df <- left_join(df, demo_data, by = "Prolific_ID")
 ## Remove Prolific ID information from dataframe
 df <- df %>%
   select(-`Prolific_ID`)
+
+## Remove the Prolific submission ID, which also links back to participants
+df <- df %>%
+  select(-`Participant External Session ID`)
 
 # Clean workspace
 rm(no_consent_list, demo_data)
