@@ -1,0 +1,35 @@
+---
+title: "Response to Reviewers: Smiling your way to happiness or misery? Experimental tests of competing perspectives"
+suppress-abstract: true
+suppress-keywords: true
+bibliography: references.bib
+floatsintext: true
+numbered-lines: false
+mask: false
+draft-date: false
+meta-analysis: false
+format:
+  apaquarto-docx: default
+---
+
+|  |
+|------------------------------------------------------------------------|
+| **Sample size.** *The Stage I Registered Report states that N = 1200 participants would be recruited, whereas the Stage II manuscript reports that data were collected from N = 1174 participants. Please clarify the reason for this difference and, if it represents a deviation from the approved Stage I protocol, include it in Table 2 alongside the other deviations.* |
+
+Thank you for bringing this discrepancy to our attention. We agree this should be more clearly documented.
+
+In the updated manuscript, we clarify that we collected data from N = 1201 participants – 1 more than our initial goal. After debriefing, 27 of these participants withdrew consent for us to use their data, leaving N = 1174. We report this in the updated Methods, Table 2, Results, and Limitations. For your convenience , we have provided a copy of our manuscript with tracked changes.
+
+|  |
+|------------------------------------------------------------------------|
+| **Facial-expression analysis.** The manuscript identifies a change from HumeAI to OpenFace 2.2.0 for facial-expression analysis. However, the sensitivity-analysis section continues to describe the preregistered exclusion criterion as an increase of 0.3 or greater in AU12 activity "according to Hume AI." Please clarify how this criterion was implemented following the switch to OpenFace and revise the Methods so that they accurately describe the analysis that was conducted. If the change in software required any change in the operationalisation of this criterion, please describe this explicitly. |
+
+Thank you for your guidance on this matter. We were unsure how much of the original Methods text to retain, but we have now revised the section to be more streamlined and clear.\
+\
+"After the study was complete, we evaluated how well participants completed the face movement tasks. To do so, we planned to use emotion expression recognition applications, like Hume AI and OpenFace 2.2.0...In the present work, we focused on Action Unit 12, which is associated with pulling the corner of the lips back towards the ear. For sensitivity analyses, we pre-registered that we would exclude participants who did not exhibit 30% more Action Unit 12 activity when posing smiles vs. expressing themselves naturally. Originally, we planned to use the commercially-available Hume AI (0.30 cutoff on a 0 - 1 scale). However, we ultimately used the openly-available OpenFace 2.2.0 because Hume AI deprecated their expression analysis application. OpenFace 2.2.0 uses a 0 -- 5 scale, so the cutoff was rescaled to 1.5."
+
+|  |
+|------------------------------------------------------------------------|
+| **Interpretation of the findings.** Please review the strength of the language used to characterise the observed effects and their relationship to real-world emotion labor. In particular, statements such as “far stronger deleterious effects,” “conditions that best match real-world emotion labor conditions,” and the concluding description of posed smiles as “a far more powerful source of our misery” appear stronger than the evidence from this experiment supports. Please temper or qualify these statements so that the conclusions remain appropriately tied to the observed effects and the experimental conditions examined here.  |
+
+Thank you for catching our instances of overenthusiasm. The updated manuscript tempers the language considerably. For example, we agree that we spoke beyond the evidence when we previously claimed "...*far stronger* deleterious effects...". The statistical significance of these differences were not formally targeted or tested in our Registered Report. The claim has been been adjusted to "Furthermore, in positive contexts, posed smiles had deleterious effects on mood." Similarly, we previously overstated that "In some contexts, posed smiles can be the source of our happiness -- in others, *a far more powerful source* of our misery". We adjusted to "Taken together, results suggest that posed smiles can be mood-boosting in some contexts and mood-dampening in others --- a potential source of both happiness and misery." For your convenience , we have provided a copy of our manuscript with tracked changes.
